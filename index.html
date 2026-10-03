@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Block Design</title>
+  <style>
+    :root {
+      --bg: #121316;
+      --fg: #e2e4e9;
+      --border: #2e3138;
+      --accent: #42a5f5;
+      --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      height: 100vh;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .brand { font-weight: 600; font-size: 14px; }
+    .brand span { color: var(--accent); }
+    .workspace {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      min-height: 0;
+    }
+    .canvas {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .rect {
+      position: absolute;
+      border: 1px solid #2e3138;
+      background: transparent;
+      cursor: move;
+    }
+    .rect.selected {
+      outline: 2px solid var(--accent);
+      outline-offset: -1px;
+    }
+    .rect .num {
+      position: absolute;
+      top: 2px;
+      left: 4px;
+      font-size: 10px;
+      color: #6b7280;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    .chat {
+      border-top: 1px solid var(--border);
+      padding: 8px 16px;
+      flex-shrink: 0;
+      display: flex;
+      gap: 8px;
+    }
+    .chat input {
+      flex: 1;
+      background: #1a1b1f;
+      border: 1px solid var(--border);
+      color: var(--fg);
+      padding: 8px 12px;
+      font: 400 12px/1.45 var(--font);
+      outline: none;
+    }
+    .chat input:focus { border-color: var(--accent); }
+    .chat button {
+      background: var(--accent);
+      color: #121316;
+      border: none;
+      padding: 8px 16px;
+      font: 500 12px/1 var(--font);
+      cursor: pointer;
+    }
+    .chat button:hover { background: #64b5f6; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">Block <span>Design</span></div>
+    <div style="color:#6b7280;font-size:12px">Sprach-Layout-Editor</div>
+  </div>
+  <div class="workspace">
+    <div class="canvas" id="canvas" style="width:1280px;height:768px"></div>
+  </div>
+  <div class="chat">
+    <input id="cmd" type="text" placeholder="Befehl eingeben — z. B. erstell ein Rechteck">
+    <button id="send">Senden</button>
+  </div>
+  <script>
+    const canvas = document.getElementById('canvas'));
+    const cmd = document.getElementById('cmd'));
+    const send = document.getElementById('send'));
+    let nextNum = 1;
+    let selected = null;
+
+    function createRect(w, h) {
+      const el = document.createElement('div'));
+      el.className = 'rect';
+      el.style.width = w + 'px';
+      el.style.height = h + 'px';
+      el.style.left = '40px';
+      el.style.top = '40px';
+      const num = document.createElement('span'));
+      num.className = 'num';
+      num.textContent = nextNum++;
+      el.appendChild(num));
+      el.addEventListener('click', () => {
+        if (selected) selected.classList.remove('selected'));
+        selected = el;
+        el.classList.add('selected'));
+      });
+      canvas.appendChild(el));
+      return el;
+    }
+
+    function handle(text) {
+      const t = text.toLowerCase().trim();
+      if (t.startsWith('erstell')) {
+        createRect(120, 40);
+      } else if (t.startsWith('mach') && t.includes('kleiner')) {
+        if (selected) {
+          selected.style.width = (selected.offsetWidth * 0.8) + 'px';
+          selected.style.height = (selected.offsetHeight * 0.8) + 'px';
+        }
+      } else if (t.startsWith('mach') && t.includes('größer')) {
+        if (selected) {
+          selected.style.width = (selected.offsetWidth * 1.25) + 'px';
+          selected.style.height = (selected.offsetHeight * 1.25) + 'px';
+        }
+      }
+    }
+
+    send.addEventListener('click', () => {
+      if (cmd.value.trim()) { handle(cmd.value); cmd.value = ''; }
+    });
+    cmd.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && cmd.value.trim()) { handle(cmd.value); cmd.value = ''; }
+    });
+  </script>
+</body>
+</html>
