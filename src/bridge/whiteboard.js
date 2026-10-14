@@ -53,6 +53,7 @@ export function createWhiteboardBridge(store, request = fetch) {
     if (reply.actions.length) {
       const result = store.dispatch({ type: 'aiApply', task_id: task.task_id, actions: reply.actions });
       if (!result.ok) throw new Error(result.error);
+      store.dispatch({ type: 'notice', message: 'changed' });
     }
     update(task.task_id, { status: reply.actions.length ? 'applied' : reply.proposals.length ? 'ready' : 'noChange', reply, received: true, evidence: payload.evidence });
   }

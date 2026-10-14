@@ -77,6 +77,10 @@ def transfer_group(p):
  focus(p);mx,my=point(p,module['x']+module['width']/2,module['y']+module['height']/2);p.mouse.move(mx,my);p.keyboard.press('Space');assert state(p)['ui']['grabbed']==module['id']
  before=state(p)['boxes'];p.mouse.move(mx+60,my+30);p.keyboard.press('Space');after=state(p)['boxes'];near(after[0]['x']-before[0]['x'],after[2]['x']-before[2]['x']);near(after[1]['y']-before[1]['y'],after[2]['y']-before[2]['y'])
  children=after[:2];p.keyboard.press('-');assert state(p)['boxes'][:2]==children
+ p.locator('[data-view="design"]').click()
+ child=state(p)['boxes'][0];cx,cy=point(p,child['x']+child['width']/2,child['y']+child['height']/2)
+ hit=p.evaluate('([x,y])=>document.elementFromPoint(x,y)?.closest("[data-box-id]")?.dataset.boxId',[cx,cy]);assert hit==child['id'],hit
+ assert p.locator(f'[data-box-id="{child["id"]}"] .box-content').inner_text()=='Weiter'
  p.locator('#box-type').fill('Button');p.locator('#box-type').press('Tab');assert selected(p)['type']=='Modul';assert state(p)['ui']['error']
 
 
@@ -119,6 +123,7 @@ def live_ai_change(p):
  movement_axes(p);p.keyboard.press('+');p.keyboard.press('-');p.locator('#refine').click();p.locator('#selection-panel summary').click();p.locator('#box-type').fill('Button');p.locator('#box-type').press('Tab');p.locator('#box-label').fill('Vorlage');p.locator('#box-label').press('Tab');a=selected(p)
  focus(p);p.keyboard.press('b');b=selected(p);p.mouse.click(*point(p,a['x']+a['width']/2,a['y']+a['height']/2));p.keyboard.down('Shift');p.mouse.click(*point(p,b['x']+25,b['y']+25));p.keyboard.up('Shift');p.keyboard.press('t');p.locator('#group').click();assert selected(p)['type']=='Modul'
  focus(p);p.keyboard.down('a');p.locator('[data-palette="15"]').click();p.keyboard.up('a');p.locator('[data-view="design"]').click();p.locator('[data-view="structure"]').click()
+ child=next(box for box in state(p)['boxes'] if box['id']==b['id']);p.mouse.click(*point(p,child['x']+child['width']/2,child['y']+child['height']/2));assert selected(p)['id']==b['id']
  task=send_live(p,'Beschrifte die ausgewählte Box mit Weiter.');assert task['status']=='applied',task;assert selected(p)['label']=='Weiter';assert task['reply']['actions']
  p.locator('[data-view="design"]').click();assert 'Weiter' in p.locator('.box.primary .box-content').inner_text();p.screenshot(path=str(OUT/'live-ai.png'));(OUT/'live-ai.json').write_text(json.dumps(task,ensure_ascii=False,indent=2))
 

@@ -12,7 +12,10 @@ export function proposalCard(proposal, store, retained = false) {
   const actions = document.createElement('div'); actions.className = 'np-actions';
   const apply = document.createElement('button'); apply.type = 'button'; apply.className = 'np-button'; apply.dataset.action = 'apply'; apply.textContent = t(lang, 'apply');
   apply.disabled = !s.selection.length || !!s.ui.preview || !!s.ui.grabbed;
-  apply.addEventListener('click', () => store.dispatch({ type: 'proposalApply', changes: proposal.changes }));
+  apply.addEventListener('click', () => {
+    const result = store.dispatch({ type: 'proposalApply', changes: proposal.changes });
+    if (result.ok) store.dispatch({ type: 'notice', message: 'changed' });
+  });
   actions.append(apply);
   if (!retained) {
     const retain = document.createElement('button'); retain.type = 'button'; retain.className = 'np-button'; retain.dataset.action = 'retain';

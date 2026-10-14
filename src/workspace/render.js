@@ -24,7 +24,13 @@ export function mountWorkspace(store, root) {
     canvas.style.setProperty('--hit', `${28 / s.ui.zoom}px`);
     canvas.style.backgroundImage = s.grid.enabled && s.ui.view === 'structure' ? '' : 'none';
     for (const [id, el] of elements) if (!s.boxes.some(b => b.id === id)) { el.remove(); elements.delete(id); }
-    const ordered = [...s.boxes].sort((a, b) => (a.layer === s.activeLayer) - (b.layer === s.activeLayer) || a.layer - b.layer || a.number - b.number);
+    function depth(box) {
+      let value = 0, current = box;
+      while (current.parentId) { value++; current = s.boxes.find(b => b.id === current.parentId); }
+      return value;
+    }
+    // Parent backgrounds must paint behind their children in both views.
+    const ordered = [...s.boxes].sort((a, b) => (a.layer === s.activeLayer) - (b.layer === s.activeLayer) || a.layer - b.layer || depth(a) - depth(b) || a.number - b.number);
     for (const [i, box] of ordered.entries()) {
       let el = elements.get(box.id);
       if (!el) {
