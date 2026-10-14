@@ -80,3 +80,24 @@ test('module background passes to children while geometry, label and identity st
 test('partial font edits validate known fields and preserve all unrequested font attributes',()=>{
  const s=two(),id=box(s).id;run(s,{type:'patch',id,changes:{font:{color:'#ffffff'}}});assert.deepEqual(box(s).font,{family:'system-ui',size:14,color:'#ffffff'});assert.equal(s.dispatch({type:'patch',id,changes:{font:{weight:'bold'}}}).error,'invalidValues');
 });
+
+test('selection families share one snapped/clamped displacement and parent child move once',()=>{
+ const s=two(),[a,b]=state(s).boxes;run(s,{type:'patch',id:b.id,changes:{x:700,y:500}});run(s,{type:'select',id:a.id});run(s,{type:'select',id:b.id,extend:true});
+ const before=state(s).boxes;run(s,{type:'moveSelection',dx:1000,dy:1000});const after=state(s).boxes;
+ assert.equal(after[0].x-before[0].x,after[1].x-before[1].x);assert.equal(after[0].y-before[0].y,after[1].y-before[1].y);assert.equal(after[1].x,950);assert.equal(after[1].y,590);
+ run(s,{type:'group'});const parent=box(s);run(s,{type:'select',id:parent.id});run(s,{type:'select',id:a.id,extend:true});const family=state(s).boxes;run(s,{type:'moveSelection',dx:-100,dy:-100});assert.ok(state(s).boxes.every((b,i)=>b.x===family[i].x-100&&b.y===family[i].y-100));
+});
+test('undo redo gestures and AI batches are single steps with monotonically increasing revisions',()=>{
+ const s=two(),id=box(s).id;s.begin('move');run(s,{type:'grab',id});run(s,{type:'moveSelection',dx:30,dy:30});run(s,{type:'moveSelection',dx:10,dy:10});run(s,{type:'drop'});s.end();const moved=box(s),rev=state(s).revision;run(s,{type:'undo'});assert.equal(box(s).x,480);assert.equal(state(s).revision,rev+1);run(s,{type:'redo'});assert.equal(box(s).x,moved.x);
+ const task={task_id:'undo-ai',box_ids:[id],revision:state(s).revision,activeLayer:1,applied:false};run(s,{type:'taskAdd',task});run(s,{type:'aiApply',task_id:task.task_id,actions:[{type:'patch',box_id:id,changes:{label:'AI'}},{type:'patch',box_id:id,changes:{width:70}}]});run(s,{type:'undo'});assert.equal(box(s).label,'');assert.equal(box(s).width,50);assert.equal(state(s).tasks.at(-1).applied,true);run(s,{type:'redo'});assert.equal(box(s).label,'AI');assert.equal(box(s).width,70);
+});
+
+test('prospective durable commit shares the same undo calculation and retains transient UI',()=>{
+ const s=two(),id=box(s).id,before=state(s);const action={type:'patch',id,changes:{label:'Durable'}};const prepared=s.prepare(action);assert.equal(state(s).boxes[1].label,'');assert.equal(prepared.history.undo.length,s.history().undo+1);
+ run(s,{type:'monitor',x:40,y:60});s.commitCandidate(prepared.state,action);assert.equal(box(s).label,'Durable');assert.equal(state(s).ui.monitor.x,40);assert.deepEqual(s.exportHistory(),prepared.history);
+ const noChange=s.prepare({type:'patch',id,changes:{label:'Durable'}});assert.equal(noChange.history.undo.length,s.history().undo);
+});
+
+test('changing layer during a gesture closes it before subsequent creations',()=>{
+ const s=createStore();run(s,{type:'create'});const original=box(s);s.begin('move');run(s,{type:'grab',id:original.id});run(s,{type:'moveSelection',dx:40,dy:40});run(s,{type:'layer',layer:2});run(s,{type:'create'});assert.equal(state(s).boxes.length,2);run(s,{type:'undo'});assert.equal(state(s).boxes.length,1);assert.equal(state(s).boxes[0].x,515);run(s,{type:'undo'});assert.equal(state(s).boxes[0].x,original.x);
+});

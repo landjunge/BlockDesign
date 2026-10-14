@@ -38,3 +38,14 @@ export function scale(box, factor, document) {
   const f = clamp(factor, low, high);
   box.width *= f; box.height *= f;
 }
+// A set of families moves once, snapped from Primary, clamped as one footprint.
+export function moveSelection(state, ids, dx, dy) {
+  const primary=state.boxes.find(b=>b.id===ids[0]);
+  const moving=new Map();
+  for(const id of ids){const b=state.boxes.find(b=>b.id===id);for(const child of [b,...descendants(state.boxes,id)])moving.set(child.id,child);}
+  const family=[...moving.values()];
+  dx=snap(primary.x+dx,state.grid)-primary.x;dy=snap(primary.y+dy,state.grid)-primary.y;
+  dx=clamp(dx,-Math.min(...family.map(b=>b.x)),state.document.width-Math.max(...family.map(b=>b.x+b.width)));
+  dy=clamp(dy,-Math.min(...family.map(b=>b.y)),state.document.height-Math.max(...family.map(b=>b.y+b.height)));
+  for(const b of family){b.x+=dx;b.y+=dy;}
+}

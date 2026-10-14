@@ -1,5 +1,5 @@
 {
   "version": 1,
   "model": "llama3.2:3b",
-  "reason": "Kleinste vorhandene Variante mit nachgewiesenen echten Gestaltungsvorschlägen. 1b bestand eine Aktion, scheiterte aber an Vorschlägen; 7b brachte keine Verbesserung. Kompakter relevanter Kontext, keine globalen Einstellungen oder externen Kosten."
+  "reason": "Kleinste vorhandene Variante mit nachgewiesenen lokalen Änderungen, Gestaltungsvorschlägen und Gesprächsfolge. 1b scheiterte an Vorschlägen; qwen2:7b brachte keine Qualitätsverbesserung und war langsamer. 3b mit getrennten Gesprächsrollen, explizitem Antworttyp und unabhängig geprüften Datenaktionen; bei fehlender Auswahl vorgelagerte klar gekennzeichnete Produktrückfrage. Keine globalen Änderungen oder externen Kosten."
 }

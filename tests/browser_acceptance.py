@@ -12,8 +12,8 @@ import traceback
 from playwright.sync_api import sync_playwright
 
 ROOT=Path(__file__).resolve().parents[1]
-OUT=ROOT/'docs/acceptance'
-URL=os.environ.get('BD_TEST_URL','http://127.0.0.1:5190')
+OUT=Path(os.environ.get('BD_TEST_OUT',str(ROOT/'.runtime/acceptance-v02')))
+URL=os.environ.get('BD_TEST_URL','http://127.0.0.1:5191')
 RESULTS=[]
 def state(p):return p.evaluate('window.blockDesigner.getState()')
 def focus(p):p.locator('#canvas-scroll').focus()
@@ -86,7 +86,7 @@ def transfer_group(p):
 
 def attribute_focus_views(p):
  focus(p);p.keyboard.press('b');b=selected(p);revision=state(p)['revision'];p.keyboard.down('a');assert state(p)['ui']['preview']
- p.locator('[data-palette="15"]').click();before_scroll=p.locator('#ai-space').evaluate('(e)=>e.scrollTop');p.mouse.wheel(0,-120);assert state(p)['ui']['preview']['brightness']==1;assert selected(p)['color']==b['color'];assert p.locator('#ai-space').evaluate('(e)=>e.scrollTop')==before_scroll
+ p.locator('[data-palette="15"]').click();before_scroll=p.locator('#ai-space .sidebar-content').evaluate('(e)=>e.scrollTop');p.mouse.wheel(0,-120);assert state(p)['ui']['preview']['brightness']==1;assert selected(p)['color']==b['color'];assert p.locator('#ai-space .sidebar-content').evaluate('(e)=>e.scrollTop')==before_scroll
  p.keyboard.up('a');assert selected(p)['color']=='#42a5f5';assert selected(p)['brightness']==1;assert state(p)['revision']==revision+1
  p.locator('[data-view="design"]').click();assert p.locator('.box-visual').evaluate('(e)=>getComputedStyle(e).backgroundColor')!='rgba(0, 0, 0, 0)'
  p.locator('[data-view="structure"]').click();assert p.locator('.box-visual').evaluate('(e)=>getComputedStyle(e).backgroundColor')=='rgba(0, 0, 0, 0)'
@@ -100,7 +100,7 @@ def desktop_language_longtext(p):
  focus(p);p.keyboard.press('b');p.locator('#selection-panel summary').click();long='Sehr langer Text <script>window.bad=true</script> '+('Beschreibung '*150);p.locator('#box-label').fill(long);p.locator('#box-label').press('Tab');assert selected(p)['label']==long
  p.locator('#box-type').fill('Eigener freier Typ');p.locator('#box-type').press('Tab');identity=selected(p)['id'];assert selected(p)['type']=='Eigener freier Typ';assert not p.evaluate('window.bad || false')
  for lang in ['de','en']:
-  p.locator('#language').select_option(lang);assert p.locator('html').get_attribute('lang')==lang
+  p.locator(f'[data-language="{lang}"]').click();assert p.locator('html').get_attribute('lang')==lang
   for width,height in [(1440,900),(1180,760),(900,600)]:
    p.set_viewport_size({'width':width,'height':height});p.locator('#send').scroll_into_view_if_needed();assert p.locator('#send').is_visible();assert selected(p)['id']==identity;assert state(p)['document']=={'width':1000,'height':640}
    # No automatic mobile stacking; all three columns retain horizontal order.
@@ -129,14 +129,14 @@ def live_ai_change(p):
 
 def live_ai_proposals(p):
  focus(p);p.keyboard.press('b');task=send_live(p,'Zeige mir zwei unterschiedliche Gestaltungsvorschläge für diese Box als Button. Einer blau, einer orange. Noch nicht anwenden.');assert task['reply']['proposals'],task;assert not task['reply']['actions'],task
- proposal=task['reply']['proposals'][0];card=p.locator(f'.task-card [data-proposal-id="{proposal["id"]}"]');card.locator('[data-action="retain"]').click();assert len(state(p)['myspace'])==1
+ proposal=task['reply']['proposals'][0];card=p.locator(f'.task-card [data-proposal-id="{proposal["id"]}"]');card.locator('[data-action="retain"]').click();p.wait_for_function('()=>blockDesigner.getState().myspace.length===1');assert len(state(p)['myspace'])==1
  # Applying a retained proposal is immediate and uses current validated selection.
- retained=p.locator(f'#retained [data-proposal-id="{proposal["id"]}"]');retained.locator('[data-action="apply"]').click();assert selected(p)['color']==proposal['changes'].get('color',selected(p)['color']);p.locator('[data-view="design"]').click();p.screenshot(path=str(OUT/'live-proposals-myspace.png'));(OUT/'live-proposals.json').write_text(json.dumps(task,ensure_ascii=False,indent=2))
+ retained=p.locator(f'#retained [data-proposal-id="{proposal["id"]}"]');retained.locator('[data-action="apply"]').click();p.wait_for_timeout(300);assert selected(p)['color']==proposal['changes'].get('color',selected(p)['color']);p.locator('[data-view="design"]').click();p.screenshot(path=str(OUT/'live-proposals-myspace.png'));(OUT/'live-proposals.json').write_text(json.dumps(task,ensure_ascii=False,indent=2));p.wait_for_function('()=>document.querySelector("#save-indicator").textContent==="Lokal gesichert"');before=state(p);p.reload();p.wait_for_function('()=>!!window.blockDesigner');assert state(p)['myspace']==before['myspace'];assert state(p)['boxes']==before['boxes']
 
 
 def fixture_connection(p):
  p.route('**/api/status',lambda route:route.fulfill(status=200,content_type='application/json',body=json.dumps({'ok':True,'busy':False,'model':'explicit-negative-fixture','version':'0.1.0'})))
- p.reload()
+ p.reload();p.wait_for_function("()=>!!window.blockDesigner")
 
 def negative_reply_fixtures(p):
  # No model call: injected responses are rejection fixtures only.
@@ -167,7 +167,7 @@ def stale_duplicate_disconnect_fixtures(p):
  mode['name']='disconnect';p.locator('#order').fill('Verbindungsabbruch');p.locator('#send').click();p.wait_for_function('() => window.blockDesigner.getState().tasks.at(-1)?.status==="disconnected"');before=state(p)['boxes'];assert p.locator('[data-action="reconnect"]').is_visible()
  mode['name']='duplicate';p.locator('[data-action="reconnect"]').click();p.wait_for_function('() => window.blockDesigner.getState().tasks.at(-1)?.status==="applied"');revision=state(p)['revision'];assert selected(p)['label']=='Fixture permitted label'
  # Browser bridge instance handles the repeated response via the same public module contract.
- p.evaluate('''async payload=>{const {createWhiteboardBridge}=await import('/src/bridge/whiteboard.js');const {createStore}=await import('/src/core/store.js');const s=window.blockDesigner.getState();const store=createStore(s);const bridge=createWhiteboardBridge(store);bridge.accept(payload);window.duplicateCheck={revision:store.getState().revision,boxes:store.getState().boxes};}''',replies[-1]);assert p.evaluate('window.duplicateCheck.revision')==revision;assert p.evaluate('window.duplicateCheck.boxes')==state(p)['boxes']
+ p.evaluate('''async payload=>{const {createWhiteboardBridge}=await import('/src/bridge/whiteboard.js');const {createStore}=await import('/src/core/store.js');const s=window.blockDesigner.getState();const store=createStore(s);const bridge=createWhiteboardBridge(store);await bridge.accept(payload);window.duplicateCheck={revision:store.getState().revision,boxes:store.getState().boxes};}''',replies[-1]);assert p.evaluate('window.duplicateCheck.revision')==revision;assert p.evaluate('window.duplicateCheck.boxes')==state(p)['boxes']
 
 CASES=[('BD-02-BROWSER',create_layers),('BD-03-AXES',movement_axes),('BD-03-BOUNDS',scale_bounds),('BD-04-GRID-MONITOR-ZOOM',grid_monitor_zoom),('BD-05-TRANSFER-CHILDREN',transfer_group),('BD-06-ATTR-FOCUS-VIEWS',attribute_focus_views),('BD-08-DE-EN-DESKTOP',desktop_language_longtext),('BD-07-LIVE-CHANGE',live_ai_change),('BD-07-LIVE-PROPOSALS',live_ai_proposals),('BD-07-INVALID-FIXTURE',negative_reply_fixtures),('BD-07-STALE-DUPLICATE-DISCONNECT-FIXTURE',stale_duplicate_disconnect_fixtures)]
 
@@ -179,11 +179,11 @@ def main():
    if chosen and identity not in chosen:continue
    page=browser.new_page(viewport={'width':1440,'height':900});errors=[];page.on('pageerror',lambda e:errors.append(str(e)));start=time.time()
    try:
-    page.goto(URL);fn(page);assert not errors,errors
+    page.goto(URL);page.wait_for_function('()=>!!window.blockDesigner');old=page.evaluate('localStorage.getItem("blockdesigner.project.v1")');page.locator('#projects-panel button').click();page.wait_for_function('(old)=>localStorage.getItem("blockdesigner.project.v1")!==old',arg=old);page.wait_for_timeout(100);fn(page);assert not errors,errors
     row={'id':identity,'status':'bestanden','seconds':round(time.time()-start,2)}
    except Exception as e:
     failed+=1;row={'id':identity,'status':'fehlgeschlagen','error':traceback.format_exc(),'seconds':round(time.time()-start,2)};page.screenshot(path=str(OUT/(identity+'-failure.png')))
-   page.close();RESULTS.append(row);
+   page.unroute_all(behavior="wait");page.close();RESULTS.append(row);
    with (OUT/'browser-history.jsonl').open('a') as history:history.write(json.dumps({**row,'time':time.time()},ensure_ascii=False)+'\n')
    print(json.dumps(row,ensure_ascii=False),flush=True)
    (OUT/'browser-results.json').write_text(json.dumps({'browser':'Google Chrome '+version,'url':URL,'results':RESULTS},ensure_ascii=False,indent=2))

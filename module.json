@@ -1,1 +1,24 @@
-{"id":"block-designer","name":"Block Designer","version":"0.1.0","manifest_version":1,"node_kinds":[],"relation_kinds":[],"read_scopes":["whiteboard:read"],"write_actions":["whiteboard:append"],"connectors":["ollama:127.0.0.1"],"approvals":[],"views":["block-designer:workspace"],"migrations":[],"uninstall":"retain-data"}
+{
+  "id": "block-designer",
+  "name": "BlockDesigner",
+  "version": "0.2.0",
+  "manifest_version": 1,
+  "node_kinds": [],
+  "relation_kinds": [],
+  "read_scopes": [
+    "whiteboard:read"
+  ],
+  "write_actions": [
+    "whiteboard:append",
+    "projects:write"
+  ],
+  "connectors": [
+    "ollama:127.0.0.1"
+  ],
+  "approvals": [],
+  "views": [
+    "block-designer:workspace"
+  ],
+  "migrations": [],
+  "uninstall": "retain-data"
+}

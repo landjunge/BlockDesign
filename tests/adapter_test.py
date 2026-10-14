@@ -48,4 +48,13 @@ class AdapterSafety(unittest.TestCase):
  def test_reply_extra_fields_wrong_structure_and_large_values(self):
   data=raw();data['code']='arbitrary';self.reject(data)
   self.reject('not JSON');self.reject(raw({'label':'x'*4001}))
+class ConversationSafety(unittest.TestCase):
+ def test_question_has_no_actions_or_proposals(self):
+  p=copy.deepcopy(PACKET);reply=validate_reply({'summary':'Need context','actions':[],'proposals':[],'question':'Which box?'},p);self.assertEqual(reply['question'],'Which box?')
+  with self.assertRaises(ContractError):validate_reply({'summary':'Contradiction','actions':[{'type':'patch','box_id':p['box_ids'][0],'changes':{'label':'bad'}}],'proposals':[],'question':'Which box?'},p)
+ def test_conversation_version_and_current_selection_binding(self):
+  p=copy.deepcopy(PACKET);p['conversation']={'version':1,'project_id':'project-1','snapshot_id':'snapshot-1','parent_task_id':None,'selection_changed':False,'turns':[]};validate_request(p)
+  p['conversation']['version']=99
+  with self.assertRaises(ContractError):validate_request(p)
+
 if __name__=='__main__':unittest.main(verbosity=2)

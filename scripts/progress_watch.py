@@ -17,5 +17,5 @@ if __name__=='__main__':
             with urlopen('http://127.0.0.1:5190/api/status',timeout=2) as r: online=r.status==200
         except Exception: online=False
         text='Betriebscheck: Browserhost '+('erreichbar' if online else 'nicht erreichbar')+'. Aktiver Schritt '+current['step']+'. Zuletzt bearbeitet: '+', '.join(str(p.relative_to(PROJECT)) for p in files)+'. Abschluss noch nicht bestätigt; nächste Handlung: '+current['next']
-        host.append('progress',text,'bd-build-20261014',current['step'],run_id=current['session'],metadata={'operating_check':True,'server_reachable':online})
+        host.append('progress',text,current.get('overall','bd-build-20261014'),current['step'],run_id=current['session'],metadata={'operating_check':True,'server_reachable':online})
         host.append('progress',text,current['task'],current['step'],run_id=current['session'],metadata={'operating_check':True})

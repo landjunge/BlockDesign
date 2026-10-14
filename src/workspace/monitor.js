@@ -2,9 +2,9 @@ import { clamp } from '../core/geometry.js';
 import { t } from '../i18n.js';
 const format = (n, lang) => new Intl.NumberFormat(lang, { maximumFractionDigits: 2 }).format(n);
 export function mountMonitor(store, root) {
-  const panel = root.querySelector('#monitor'), handle = root.querySelector('#monitor-handle'), viewport = root.querySelector('#viewport');
+  const panel = root.querySelector('#monitor'), handle = root.querySelector('#monitor-handle'), viewport = window;
   let drag = null;
-  function place(x, y) { store.dispatch({ type: 'monitor', x: clamp(x, 0, Math.max(0, viewport.clientWidth - panel.offsetWidth)), y: clamp(y, 0, Math.max(0, viewport.clientHeight - panel.offsetHeight)) }); }
+  function place(x, y) { store.dispatch({ type: 'monitor', x: clamp(x, 0, Math.max(0, window.innerWidth - panel.offsetWidth)), y: clamp(y, 0, Math.max(0, window.innerHeight - panel.offsetHeight)) }); }
   handle.addEventListener('pointerdown', e => { const s = store.getState(); drag = { x: e.clientX, y: e.clientY, start: s.ui.monitor }; handle.setPointerCapture(e.pointerId); e.stopPropagation(); });
   handle.addEventListener('pointermove', e => { if (drag) { place(drag.start.x + e.clientX - drag.x, drag.start.y + e.clientY - drag.y); e.stopPropagation(); } });
   handle.addEventListener('pointerup', () => { drag = null; });
@@ -28,5 +28,6 @@ export function mountMonitor(store, root) {
     }
     values.append(dl);
   });
-  new ResizeObserver(() => { const m = store.getState().ui.monitor; place(m.x, m.y); }).observe(viewport);
+  const keep=()=>{const m=store.getState().ui.monitor;place(m.x,m.y);};
+  window.addEventListener('resize',keep);keep();
 }

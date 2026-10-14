@@ -14,7 +14,7 @@ export function initialState() {
     grid: { spacing: 20, magnet: 2, enabled: true },
     myspace: [], tasks: [],
     ui: { language: 'de', view: 'structure', zoom: .75, grabbed: null, preview: null,
-      monitor: { x: 16, y: 16, last: null }, notice: '', noticeArgs: {}, error: false },
+      monitor: { x: 240, y: 136, last: null }, notice: '', noticeArgs: {}, error: false },
   };
 }
 export function newBox(number, layer, x, y, width = 50, height = 50) {

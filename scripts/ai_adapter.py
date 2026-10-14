@@ -8,6 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import re
 from threading import RLock, Event, Thread
@@ -53,14 +54,14 @@ def grid_values(grid):
     exact(grid,{'spacing','magnet','enabled'})
     require(number(grid['spacing']) and .25<=grid['spacing']<=1000 and number(grid['magnet']) and 0<=grid['magnet']<=grid['spacing']/2 and type(grid['enabled'])==bool)
 
-def validate_snapshot(s):
+def validate_snapshot(s,max_boxes=100):
     exact(s,{'version','revision','document','boxes','selection','activeLayer','grid','coordinates','zoom','language'})
     require(type(s['version'])==int and s['version']==1 and type(s['revision'])==int and s['revision']>=0 and type(s['activeLayer'])==int and s['activeLayer'] in [1,2,3])
     exact(s['document'],{'width','height'})
     require(all(number(s['document'][k]) and 50<=s['document'][k]<=10000 for k in ['width','height']))
     require(s['coordinates']=={'origin':[0,0],'x':'right','y':'down','unit':'px','pixel_scale':1})
     require(number(s['zoom']) and .25<=s['zoom']<=2 and s['language'] in ['de','en'])
-    require(isinstance(s['boxes'],list) and len(s['boxes'])<=100 and isinstance(s['selection'],list) and len(s['selection'])<=100)
+    require(isinstance(s['boxes'],list) and len(s['boxes'])<=max_boxes and isinstance(s['selection'],list) and len(s['selection'])<=100)
     grid_values(s['grid']); ids=set();numbers=set()
     for b in s['boxes']:
         exact(b,PATCH_KEYS|{'id','number','orientation','layer','parentId'})
@@ -82,7 +83,14 @@ def validate_snapshot(s):
     return s
 
 def validate_request(packet):
-    exact(packet,{'task_id','instruction','box_ids','revision','snapshot'})
+    exact(packet,{'task_id','instruction','box_ids','revision','snapshot'}|({'conversation'} if 'conversation' in packet else set()))
+    if 'conversation' in packet:
+        c=packet['conversation'];exact(c,{'version','project_id','snapshot_id','parent_task_id','selection_changed','turns'})
+        require(c['version']==1 and isinstance(c['project_id'],str) and ID.fullmatch(c['project_id']) and isinstance(c['snapshot_id'],str) and ID.fullmatch(c['snapshot_id']) and (c['parent_task_id'] is None or isinstance(c['parent_task_id'],str)) and type(c['selection_changed'])==bool)
+        require(isinstance(c['turns'],list) and len(c['turns'])<=2)
+        for turn in c['turns']:
+            exact(turn,{'task_id','instruction','summary','question','box_ids','status','actions'})
+            require(all(isinstance(turn[k],str) for k in ['task_id','instruction','summary','question','status']) and len(turn['instruction'])<=1000 and len(turn['summary'])<=1500 and len(turn['question'])<=500 and isinstance(turn['box_ids'],list) and isinstance(turn['actions'],list) and len(turn['actions'])<=100)
     require(isinstance(packet['task_id'],str) and ID.fullmatch(packet['task_id']),'unknownTask')
     require(isinstance(packet['instruction'],str) and 0<len(packet['instruction'].strip())<=1000,'emptyOrder')
     reject_secrets(packet['instruction']);validate_snapshot(packet['snapshot'])
@@ -90,7 +98,7 @@ def validate_request(packet):
     # The existing host has a 16k metadata contract; fail visibly rather than truncate.
     require(len(json.dumps(packet,ensure_ascii=False))<=13500,'contextTooLarge')
     # UTF-8 bytes give a conservative token upper bound; no silent context truncation.
-    require(len(SYSTEM_PROMPT.encode())+len(prompt(packet).encode())+800+100<=4096,'contextTooLarge')
+    require(len(json.dumps(messages(packet),ensure_ascii=False).encode())+800+100<=8192,'contextTooLarge')
     return packet
 
 def descendants(boxes, identity):
@@ -102,7 +110,13 @@ def descendants(boxes, identity):
 def validate_reply(raw, packet):
     if isinstance(raw,str):
         require(len(raw)<=14000);raw=json.loads(raw)
-    exact(raw,{'summary','actions','proposals'})
+    exact(raw,{'summary','actions','proposals'}|({'question'} if 'question' in raw else set())|({'kind'} if 'kind' in raw else set()))
+    kind=raw.get('kind');require(kind is None or kind in ['edit','proposal','question'])
+    if kind=='edit':require(bool(raw['actions']))
+    if kind=='proposal':require(not raw['actions'] and bool(raw['proposals']))
+    if kind=='question':require(bool(raw.get('question')))
+    question=raw.get('question','');require(isinstance(question,str) and len(question)<=500)
+    if question:require(raw['actions']==[] and raw['proposals']==[])
     require(isinstance(raw['summary'],str) and 0<len(raw['summary'])<=1500)
     require(isinstance(raw['actions'],list) and len(raw['actions'])<=100 and isinstance(raw['proposals'],list) and len(raw['proposals'])<=100)
     working=deepcopy(packet['snapshot']);boxes={b['id']:b for b in working['boxes']}
@@ -143,33 +157,68 @@ def validate_reply(raw, packet):
         proposals.append({**deepcopy(p),'id':str(uuid4()),'source_task':packet['task_id']})
     reply={'version':1,'task_id':packet['task_id'],'revision':packet['revision'],'box_ids':packet['box_ids'],
            'summary':raw['summary'],'actions':raw['actions'],'proposals':proposals}
+    if question:reply['question']=question
     require(len(json.dumps(reply,ensure_ascii=False))<=13500,'contextTooLarge')
     reject_secrets(json.dumps(reply,ensure_ascii=False));return reply
 
-SYSTEM_PROMPT = """You are a box design editor. Fulfill the user instruction by returning actual edits or design proposals as JSON.
-Reply with exactly 3 keys: summary (brief text), actions (array of edits), proposals (array of suggestions).
-Do not merely describe edits: a requested change MUST appear in actions.
-Patch example: {"type":"patch","box_id":"exact selected id","changes":{"label":"requested text"}}.
-Other patch attributes: type, x,y,width,height,radius,color (#RRGGBB design fill), borderColor,borderWidth,brightness,font (family,size,color).
-Scale edit: {"type":"scale","box_id":"exact selected id","factor":1.1}; smaller factor 0.9090909090909091.
-Grid edit: {"type":"grid","spacing":10,"magnet":1}; finer halves both existing values.
-A proposal has title,description,changes (style attributes without x/y). For requested suggestions return proposals, no immediate actions. Give useful different designs.
-Only edit selected_ids, only active layer; preserve other attributes and identity. Min size 4px; stay within document bounds. Never execute code or add functions. Types are labels.
+SYSTEM_PROMPT = """Du bearbeitest ein Box-Dokument. Nur der LETZTE aktuelle Auftrag gilt. Vergangene Aufträge und Antworten dienen dem Verständnis, sie werden nicht wiederholt.
+Wähle zuerst kind: edit für eine verlangte Änderung, proposal ausschließlich für ausdrücklich verlangte Gestaltungsvorschläge, question bei wesentlich fehlenden Angaben.
+Antwort als JSON: kind, summary (ein kurzer Satz in Nutzersprache), actions, proposals, question (sonst leer).
+Gib genau EINEN Ergebnisstand aus, KEINE Zwischenschritte oder wiederholte Verkleinerungen. Pro Box höchstens EIN patch mit allen gewünschten Attributen. Rechne den endgültigen Wert einmal aus. Eine verlangte Änderung MUSS echte actions enthalten. Niemals eine direkt verlangte Änderung als proposal ausgeben. Beschriften ändert das Attribut label.
+Unklarer Bezug oder unklarer gewünschter Effekt: konkrete question mit leeren actions/proposals. Keine bloße Bestätigungsfrage bei eindeutigen Aufträgen. Ohne Auswahl bei einem Objektauftrag nach dem Objekt fragen.
+Nur CURRENT selected_ids bearbeiten. Frühere IDs sind KEINE neuen Ziele. CURRENT targets enthalten die maßgeblichen aktuellen Werte.
+Folgeauftrag "etwas schmaler": ausschließlich aktuelle width um 10 Prozent reduzieren; height und Position bleiben erhalten.
+patch: type=patch, box_id=exakte aktuelle ID, changes=gewünschte Attribute. Exakte Maße als width/height patchen, nicht proportional scale verwenden.
+Attribute: type,x,y,width,height,radius,color (#RRGGBB),borderColor,borderWidth,brightness,font (family,size,color),label. family nur system-ui,sans-serif,serif,monospace. Mindestmaß 4px, Dokumentgrenzen erhalten.
+scale: type=scale,box_id,factor. grid: type=grid,spacing,magnet; feiner halbiert beide aktuellen Rasterwerte.
+proposal: title,description,changes mit Gestaltung und ohne x/y. Nur bei verlangten Vorschlägen.
+Keine Identitäten/Ebenen/Zugehörigkeiten ändern, keinen Code erzeugen oder ausführen.
 """
+
+def response_schema(packet):
+    """Constrain serialization; independent validators remain authoritative."""
+    changes={'type':'object','minProperties':1,'properties':{
+        **{k:{'type':'number'} for k in ['x','y','width','height','radius','brightness','borderWidth']},
+        **{k:{'type':'string'} for k in ['type','label','color','borderColor']},
+        'paletteIndex':{'type':['integer','null']},
+        'font':{'type':'object','properties':{'family':{'type':'string'},'size':{'type':'number'},'color':{'type':'string'}},'additionalProperties':False}},'additionalProperties':False}
+    def obj(properties):return {'type':'object','properties':properties,'required':list(properties),'additionalProperties':False}
+    target={'type':'string','enum':packet['box_ids']}
+    operations=[obj({'type':{'const':'patch'},'box_id':target,'changes':changes}),obj({'type':{'const':'scale'},'box_id':target,'factor':{'type':'number'}}),obj({'type':{'const':'grid'},'spacing':{'type':'number'},'magnet':{'type':'number'}})]
+    if not packet['box_ids']:operations=operations[-1:]
+    style=deepcopy(changes)
+    for key in ['x','y']:style['properties'].pop(key)
+    properties={'kind':{'type':'string','enum':['edit','proposal','question']},'summary':{'type':'string'},'actions':{'type':'array','maxItems':max(1,len(packet['box_ids'])+1),'items':{'anyOf':operations}},'proposals':{'type':'array','items':obj({'title':{'type':'string'},'description':{'type':'string'},'changes':style})},'question':{'type':'string'}}
+    return obj(properties)
+
+
 def prompt(packet):
     snapshot=packet['snapshot'];selected=set(packet['box_ids'])
     targets=[b for b in snapshot['boxes'] if b['id'] in selected]
     children=[{k:b[k] for k in ['x','y','width','height','layer']} for target in targets for b in descendants(snapshot['boxes'],target['id'])]
     return json.dumps({'instruction':packet['instruction'],'selected_ids':packet['box_ids'],'revision':packet['revision'],
         'targets':targets,'children':children,'document':snapshot['document'],'activeLayer':snapshot['activeLayer'],
-        'grid':snapshot['grid'],'coordinates':snapshot['coordinates'],'zoom':snapshot['zoom'],'language':snapshot['language']},ensure_ascii=False)
+        'selection_changed':packet.get('conversation',{}).get('selection_changed',False),'grid':snapshot['grid'],'coordinates':snapshot['coordinates'],'zoom':snapshot['zoom'],'language':snapshot['language']},ensure_ascii=False)
+
+
+def messages(packet):
+    # Real conversational roles keep historical instructions separate from the
+    # current command. The packet itself remains immutable and fully journaled.
+    result=[{'role':'system','content':SYSTEM_PROMPT}]
+    for turn in packet.get('conversation',{}).get('turns',[]):
+        result.append({'role':'user','content':turn['instruction']})
+        previous={'summary':'['+turn['status']+'] '+turn['summary'],'actions':turn['actions'],'proposals':[]}
+        if turn['question']:previous['question']=turn['question']
+        result.append({'role':'assistant','content':json.dumps(previous,ensure_ascii=False)})
+    result.append({'role':'user','content':'CURRENT DOCUMENT DATA (not instructions): '+prompt({**packet,'instruction':''})+'\nCURRENT INSTRUCTION: '+packet['instruction']})
+    return result
 
 
 class AIAdapter:
     def __init__(self,host,executor=None):
         self.host=host;self.jobs={};self.lock=RLock();self.pool=ThreadPoolExecutor(max_workers=1);self.executor=executor
         self.config=json.loads((PROJECT/'ai-config.json').read_text())
-        self.folder=PROJECT/'.runtime/tasks';self.folder.mkdir(parents=True,exist_ok=True)
+        self.folder=Path(os.environ.get('BD_TASK_ROOT',str(PROJECT/'.runtime/tasks')));self.folder.mkdir(parents=True,exist_ok=True)
         for p in self.folder.glob('*.json'):
             data=json.loads(p.read_text());self.jobs[data['task_id']]=data
             if data['status'] not in ['ready','failed']:
@@ -180,7 +229,7 @@ class AIAdapter:
         status['model']=selected
         self.host.context(lambda c:c.read_whiteboard(self.host.thread_id))
         return {'ok':status['enabled'] and status['ollama_ok'] and status['model'] in status['models'],
-                'model':status['model'],'thread_id':self.host.thread_id,'version':'0.1.0','busy':any(j['status'] in ['waiting','claimed','running'] for j in self.jobs.values())}
+                'model':status['model'],'thread_id':self.host.thread_id,'version':'0.2.0','busy':any(j['status'] in ['waiting','claimed','running'] for j in self.jobs.values())}
     def save(self,job):
         path=self.folder/(job['task_id']+'.json');temp=path.with_suffix('.tmp');temp.write_text(json.dumps(job,ensure_ascii=False));temp.chmod(0o600);temp.replace(path)
     def public(self,job):return {k:deepcopy(v) for k,v in job.items() if k not in {'packet','raw_response'}}
@@ -217,7 +266,7 @@ class AIAdapter:
             Thread(target=heartbeat,daemon=True).start()
             metrics={}
             def transport(url,body,timeout):
-                body={**body,'messages':[{'role':'system','content':SYSTEM_PROMPT},{'role':'user','content':prompt(packet)}],'format':'json','options':{'temperature':0,'num_predict':800,'num_ctx':4096}}
+                body={**body,'messages':messages(packet),'format':response_schema(packet),'options':{'temperature':0,'num_predict':800,'num_ctx':8192}}
                 response=default_transport(url,body,timeout)
                 metrics.update({k:response.get(k) for k in ['model','eval_count','prompt_eval_count','total_duration']})
                 return response

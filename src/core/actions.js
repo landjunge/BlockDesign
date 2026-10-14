@@ -1,6 +1,6 @@
 import { clone, editable, primary, newBox, validatePatch } from './model.js';
 import { PALETTE } from './palette.js';
-import { descendants, move, resize, scale } from './geometry.js';
+import { descendants, move, moveSelection, resize, scale } from './geometry.js';
 
 const touch = s => { s.revision++; };
 function patch(s, id, changes) {
@@ -61,6 +61,10 @@ export function reduce(state, action) {
       if (!s.selection.includes(a.id)) s.selection = [a.id];
       s.ui.grabbed = a.id; touch(s); break;
     case 'drop': s.ui.grabbed = null; touch(s); break;
+    case 'moveSelection':
+      if(![a.dx,a.dy].every(v=>typeof v==='number'&&Number.isFinite(v))||!s.selection.length)throw Error('invalidValues');
+      for(const id of s.selection)editable(s,id);
+      moveSelection(s,s.selection,a.dx,a.dy);touch(s);break;
     case 'move':
       if (![a.dx, a.dy].every(v => typeof v === 'number' && Number.isFinite(v))) throw new Error('invalidValues');
       move(s.boxes, editable(s, a.id), a.dx, a.dy, s.document, s.grid); touch(s); break;
@@ -131,6 +135,8 @@ export function reduce(state, action) {
       s.ui.preview = null; break;
     case 'previewCancel': s.ui.preview = null; break;
     case 'notice': s.ui.notice = a.message; s.ui.noticeArgs = a.args || {}; s.ui.error = !!a.error; break;
+    case 'aiPreview': s.ui.aiPreview=clone(a.preview);break;
+    case 'aiPreviewClear':s.ui.aiPreview=null;break;
     case 'taskAdd': s.tasks.push(clone(a.task)); break;
     case 'taskUpdate': {
       const t = s.tasks.find(t => t.task_id === a.task_id); if (!t) throw new Error('unknownTask');
@@ -153,6 +159,7 @@ export function reduce(state, action) {
     case 'proposalApply':
       if (!s.selection.length) throw new Error('needSelection');
       for (const id of s.selection) patch(s, id, a.changes);
+      if(a.sourceTask){const task=s.tasks.find(t=>t.task_id===a.sourceTask);if(task){task.status='applied';task.proposal_applications=[...(task.proposal_applications||[]),{proposal_id:a.proposalId,box_ids:clone(s.selection),revision:s.revision+1}];}}
       touch(s); break;
     default: throw new Error('invalidAction');
   }

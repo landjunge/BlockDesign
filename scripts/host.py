@@ -20,21 +20,26 @@ class Host:
         self.registry = ModuleRegistry(self.store)
         self.runtime = ModuleRuntime(self.store, self.registry)
         self.manifest = ModuleManifest.from_dict(json.loads((PROJECT/'module.json').read_text()))
+        try: installed=self.registry.get(self.manifest.id)
+        except NotFound:raise RuntimeError('Modulanschluss fehlt: ./start.command --setup ausführen.') from None
+        if installed.manifest.to_dict()!=self.manifest.to_dict():
+            # Registry preserves disabled state and enforces new approvals.
+            self.registry.update(self.manifest)
         self.binding = binding or PROJECT/'.runtime/binding.json'
         if not self.binding.exists():
             raise RuntimeError('Hostanschluss fehlt: ./start.command --setup ausführen.')
         data = json.loads(self.binding.read_text())
         self.thread_id = data['thread_id']
         self.store.get_thread(self.thread_id)
-    def context(self, fn):
-        result = self.runtime.run(self.manifest.id, 'whiteboard:append', fn)
+    def context(self, fn, action='whiteboard:append'):
+        result = self.runtime.run(self.manifest.id, action, fn)
         if not result.ok:
             raise RuntimeError(result.error)
         return result.value
     def entries(self):
         return self.context(lambda c: c.read_whiteboard(self.thread_id))
     def append(self, kind, text, task_id, step_id=None, actor_type='codex', run_id=None, metadata=None, key=None):
-        fields = dict(actor='Block Designer' if actor_type=='human' else 'Codex' if actor_type=='codex' else 'lokale KI',
+        fields = dict(actor='BlockDesigner' if actor_type=='human' else 'Codex' if actor_type=='codex' else 'lokale KI',
                       actor_type=actor_type, entry_type=kind, content=text, task_id=task_id,
                       run_id=run_id, metadata={**(metadata or {}), 'step_id':step_id}, external_key=key)
         if actor_type=='local-assistant':
@@ -56,9 +61,9 @@ def setup():
     if not binding.exists():
         service = ThreadService(store=store)
         previous = store.get_current_id()
-        thread = next((t for t in service.list() if t.title=='Block Designer'), None)
+        thread = next((t for t in service.list() if t.title in ['BlockDesigner','Block Designer']), None)
         if thread is None:
-            thread = service.create('Block Designer','Modulares Browser-Prototyp-Modul; Konzept in Zukunftsvisionen/Ideen/Block Designer.')
+            thread = service.create('BlockDesigner','Modulares Browser-Prototyp-Modul; Konzept in Zukunftsvisionen/Ideen/Block Designer.')
             store.set_current_id(previous)
         binding.write_text(json.dumps({'thread_id':thread.id,'root':str(store.root),'source':str(SOURCE)},indent=2)+'\n')
     print('HOST_BOUND', binding.read_text().strip())
