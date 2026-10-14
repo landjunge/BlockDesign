@@ -105,3 +105,7 @@ test('changing layer during a gesture closes it before subsequent creations',()=
 test('archived restored instructions cannot replay even with a matching revision',()=>{
  const s=two(),id=box(s).id;run(s,{type:'taskAdd',task:{task_id:'archived',box_ids:[id],revision:state(s).revision,activeLayer:1,applied:false,archived:true}});const before=state(s).boxes;assert.equal(s.dispatch({type:'aiApply',task_id:'archived',actions:[{type:'patch',box_id:id,changes:{label:'Replay'}}]}).error,'staleReply');assert.deepEqual(state(s).boxes,before);
 });
+
+test('a rejected gesture interruption cannot change undo history',()=>{
+ const s=two(),id=box(s).id,count=s.history().undo;s.begin('move');run(s,{type:'grab',id});run(s,{type:'moveSelection',dx:20,dy:20});assert.equal(s.dispatch({type:'layer',layer:4}).ok,false);assert.equal(s.history().undo,count);run(s,{type:'moveSelection',dx:10,dy:10});run(s,{type:'drop'});s.end();assert.equal(s.history().undo,count+1);
+});

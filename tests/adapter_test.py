@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 import unittest
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
-from ai_adapter import ContractError, validate_request, validate_reply, validate_snapshot
+from ai_adapter import response_schema, intent_messages, ContractError, validate_request, validate_reply, validate_snapshot
 
 BOX={'id':'synthetic-box-1','number':1,'orientation':'hsl(137.508 80% 76%)','layer':1,'type':'Box','x':475,'y':295,'width':50,'height':50,'radius':0,'color':'#ffffff','paletteIndex':4,'brightness':0,'borderColor':'#808080','borderWidth':1,'font':{'family':'system-ui','size':14,'color':'#000000'},'label':'','parentId':None}
 SNAPSHOT={'version':1,'revision':4,'document':{'width':1000,'height':640},'boxes':[BOX],'selection':[BOX['id']],'activeLayer':1,'grid':{'spacing':20,'magnet':2,'enabled':True},'coordinates':{'origin':[0,0],'x':'right','y':'down','unit':'px','pixel_scale':1},'zoom':.75,'language':'de'}
@@ -52,6 +52,10 @@ class ConversationSafety(unittest.TestCase):
  def test_question_has_no_actions_or_proposals(self):
   p=copy.deepcopy(PACKET);reply=validate_reply({'summary':'Need context','actions':[],'proposals':[],'question':'Which box?'},p);self.assertEqual(reply['question'],'Which box?')
   with self.assertRaises(ContractError):validate_reply({'summary':'Contradiction','actions':[{'type':'patch','box_id':p['box_ids'][0],'changes':{'label':'bad'}}],'proposals':[],'question':'Which box?'},p)
+ def test_intent_specific_answer_cannot_mix_edits_with_proposals(self):
+  p=copy.deepcopy(PACKET);data=raw();data.update(kind='edit',question='');data['proposals']=[{'title':'unrequested','description':'fixture','changes':{'color':'#ffffff'}}]
+  with self.assertRaises(ContractError):validate_reply(data,p)
+  schema=response_schema(p,'proposal');self.assertEqual(schema['properties']['actions']['maxItems'],0);self.assertEqual(schema['properties']['kind']['const'],'proposal');self.assertEqual(intent_messages(p)[-1]['role'],'user')
  def test_conversation_version_and_current_selection_binding(self):
   p=copy.deepcopy(PACKET);p['conversation']={'version':1,'project_id':'project-1','snapshot_id':'snapshot-1','parent_task_id':None,'selection_changed':False,'turns':[]};validate_request(p)
   p['conversation']['version']=99

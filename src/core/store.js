@@ -145,6 +145,8 @@ export function createStore(initial = initialState()) {
           emit();
           return { ok: true, revision: state.revision };
         }
+        const before = state,
+          next = validateState(reduce(state, { version: 1, ...action }));
         if (
           transaction &&
           ['layer', 'select', 'create', 'group', 'previewStart', 'parent'].includes(action.type)
@@ -152,8 +154,6 @@ export function createStore(initial = initialState()) {
           remember(transaction.state, state, transaction.label);
           transaction = null;
         }
-        const before = state,
-          next = validateState(reduce(state, { version: 1, ...action }));
         state = next;
         if (!transaction) remember(before, next, action.type);
         emit();

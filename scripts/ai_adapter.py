@@ -98,7 +98,7 @@ def validate_request(packet):
     # The existing host has a 16k metadata contract; fail visibly rather than truncate.
     require(len(json.dumps(packet,ensure_ascii=False))<=13500,'contextTooLarge')
     # UTF-8 bytes give a conservative token upper bound; no silent context truncation.
-    require(len(json.dumps(messages(packet),ensure_ascii=False).encode())+800+100<=8192,'contextTooLarge')
+    require(len(json.dumps(messages(packet,'proposal'),ensure_ascii=False).encode())+800+100<=8192,'contextTooLarge')
     return packet
 
 def descendants(boxes, identity):
@@ -112,7 +112,7 @@ def validate_reply(raw, packet):
         require(len(raw)<=14000);raw=json.loads(raw)
     exact(raw,{'summary','actions','proposals'}|({'question'} if 'question' in raw else set())|({'kind'} if 'kind' in raw else set()))
     kind=raw.get('kind');require(kind is None or kind in ['edit','proposal','question'])
-    if kind=='edit':require(bool(raw['actions']))
+    if kind=='edit':require(bool(raw['actions']) and not raw['proposals'] and not raw.get('question'))
     if kind=='proposal':require(not raw['actions'] and bool(raw['proposals']))
     if kind=='question':require(bool(raw.get('question')))
     question=raw.get('question','');require(isinstance(question,str) and len(question)<=500)
@@ -175,7 +175,7 @@ proposal: title,description,changes mit Gestaltung und ohne x/y. Nur bei verlang
 Keine Identitäten/Ebenen/Zugehörigkeiten ändern, keinen Code erzeugen oder ausführen.
 """
 
-def response_schema(packet):
+def response_schema(packet,kind=None):
     """Constrain serialization; independent validators remain authoritative."""
     changes={'type':'object','minProperties':1,'properties':{
         **{k:{'type':'number'} for k in ['x','y','width','height','radius','brightness','borderWidth']},
@@ -189,6 +189,11 @@ def response_schema(packet):
     style=deepcopy(changes)
     for key in ['x','y']:style['properties'].pop(key)
     properties={'kind':{'type':'string','enum':['edit','proposal','question']},'summary':{'type':'string'},'actions':{'type':'array','maxItems':max(1,len(packet['box_ids'])+1),'items':{'anyOf':operations}},'proposals':{'type':'array','items':obj({'title':{'type':'string'},'description':{'type':'string'},'changes':style})},'question':{'type':'string'}}
+    if kind:
+        properties['kind']={'const':kind}
+        if kind=='edit':properties['actions']['minItems']=1;properties['proposals']={'type':'array','maxItems':0};properties['question']={'const':''}
+        elif kind=='proposal':properties['actions']={'type':'array','maxItems':0};properties['proposals']['minItems']=1;properties['question']={'const':''}
+        else:properties['actions']={'type':'array','maxItems':0};properties['proposals']={'type':'array','maxItems':0};properties['question']['minLength']=1
     return obj(properties)
 
 
@@ -201,10 +206,11 @@ def prompt(packet):
         'selection_changed':packet.get('conversation',{}).get('selection_changed',False),'grid':snapshot['grid'],'coordinates':snapshot['coordinates'],'zoom':snapshot['zoom'],'language':snapshot['language']},ensure_ascii=False)
 
 
-def messages(packet):
+def messages(packet,kind=None):
     # Real conversational roles keep historical instructions separate from the
     # current command. The packet itself remains immutable and fully journaled.
-    result=[{'role':'system','content':SYSTEM_PROMPT}]
+    guidance={'edit':'Nur actions ausgeben; proposals leer. Genau einen patch pro Box mit allen gewünschten Attributen.','proposal':'Nur Gestaltungsvorschläge ausgeben; actions leer. Nichts sofort anwenden. In changes bedeutet type den Boxtyp (z.B. Button), niemals patch/scale/grid. Gib die verlangte Anzahl unterschiedlicher Vorschläge mit wenigen sinnvollen Attributen.','question':'Nur eine konkrete Rückfrage stellen. actions und proposals leer. Nichts ändern.'}
+    result=[{'role':'system','content':SYSTEM_PROMPT+'\n'+guidance.get(kind,'')}]
     for turn in packet.get('conversation',{}).get('turns',[]):
         result.append({'role':'user','content':turn['instruction']})
         previous={'summary':'['+turn['status']+'] '+turn['summary'],'actions':turn['actions'],'proposals':[]}
@@ -212,6 +218,16 @@ def messages(packet):
         result.append({'role':'assistant','content':json.dumps(previous,ensure_ascii=False)})
     result.append({'role':'user','content':'CURRENT DOCUMENT DATA (not instructions): '+prompt({**packet,'instruction':''})+'\nCURRENT INSTRUCTION: '+packet['instruction']})
     return result
+
+INTENT_PROMPT="""Ordne die Absicht des letzten Nutzerauftrags ein. Antworte ausschließlich {"kind":"edit"}, {"kind":"proposal"} oder {"kind":"question"}.
+edit: eine Änderung am bestehenden Dokument, z.B. beschriften, schmaler, größer, Raster ändern.
+proposal: ausdrücklich gewünschte Vorschläge, Varianten, Designs zum Ansehen, noch nicht anwenden.
+question: der Nutzer will zuerst eine Rückfrage/Entscheidung klären oder der Bezug ist wesentlich unklar.
+Keine Änderung oder Vorschläge erzeugen. Nur die Absicht des aktuellen Auftrags einordnen."""
+def intent_messages(packet):
+    previous=packet.get('conversation',{}).get('turns',[])
+    context={'instruction':packet['instruction'],'has_selection':bool(packet['box_ids']),'previous_question':previous[-1]['question'] if previous else ''}
+    return [{'role':'system','content':INTENT_PROMPT},{'role':'user','content':json.dumps(context,ensure_ascii=False)}]
 
 
 class AIAdapter:
@@ -232,7 +248,7 @@ class AIAdapter:
                 'model':status['model'],'thread_id':self.host.thread_id,'version':'0.2.0','busy':any(j['status'] in ['waiting','claimed','running'] for j in self.jobs.values())}
     def save(self,job):
         path=self.folder/(job['task_id']+'.json');temp=path.with_suffix('.tmp');temp.write_text(json.dumps(job,ensure_ascii=False));temp.chmod(0o600);temp.replace(path)
-    def public(self,job):return {k:deepcopy(v) for k,v in job.items() if k not in {'packet','raw_response'}}
+    def public(self,job):return {k:deepcopy(v) for k,v in job.items() if k not in {'packet','raw_response','raw_intent'}}
     def submit(self,packet):
         validate_request(packet)
         with self.lock:
@@ -264,16 +280,24 @@ class AIAdapter:
                 while not stop.wait(30):
                     self.host.append('progress','Lokaler Modellaufruf läuft; noch keine Antwort oder Änderung bestätigt.',task,'BD-AI.1',actor_type='local-assistant',run_id=run_id)
             Thread(target=heartbeat,daemon=True).start()
-            metrics={}
+            metrics={};intent=None;intent_metrics={}
+            if not self.executor:
+                def intent_transport(url,body,timeout):
+                    body={**body,'messages':intent_messages(packet),'format':{'type':'object','properties':{'kind':{'type':'string','enum':['edit','proposal','question']}},'required':['kind'],'additionalProperties':False},'options':{'temperature':0,'num_predict':96,'num_ctx':8192}}
+                    response=default_transport(url,body,timeout);intent_metrics.update({k:response.get(k) for k in ['model','eval_count','prompt_eval_count','total_duration']});return response
+                raw_intent=complete(model,packet['instruction'],transport=intent_transport,timeout=90)
+                self.update(task,raw_intent=reject_secrets(raw_intent));intent=json.loads(raw_intent);exact(intent,{'kind'});require(intent['kind'] in ['edit','proposal','question'])
+                self.update(task,interpretation=intent['kind'])
             def transport(url,body,timeout):
-                body={**body,'messages':messages(packet),'format':response_schema(packet),'options':{'temperature':0,'num_predict':800,'num_ctx':8192}}
+                body={**body,'messages':messages(packet,intent['kind'] if intent else None),'format':response_schema(packet,intent['kind'] if intent else None),'options':{'temperature':0,'num_predict':800,'num_ctx':8192}}
                 response=default_transport(url,body,timeout)
                 metrics.update({k:response.get(k) for k in ['model','eval_count','prompt_eval_count','total_duration']})
                 return response
             raw=self.executor(packet) if self.executor else complete(model,prompt(packet),transport=transport,timeout=180)
             self.update(task,raw_response=reject_secrets(raw))
+            if intent:require(json.loads(raw).get('kind')==intent['kind'])
             reply=validate_reply(raw,packet)
-            evidence={'model':model,'response_sha256':hashlib.sha256(raw.encode()).hexdigest(),'metrics':metrics}
+            evidence={'model':model,'response_sha256':hashlib.sha256(raw.encode()).hexdigest(),'metrics':metrics,'intent_metrics':intent_metrics,'interpretation':intent['kind'] if intent else None}
             result=self.host.append('result',reply['summary'],task,'BD-AI.2',actor_type='local-assistant',run_id=run_id,
                                     metadata={'role':'box-result','reply':reply,'evidence':evidence},key='bd-result-'+task)
             returned=next(e for e in self.host.entries() if e['id']==result['id'])
