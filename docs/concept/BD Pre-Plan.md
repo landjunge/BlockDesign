@@ -182,3 +182,32 @@ Verantwortlich: aktive Codex-Session, Gesamt-task_id `bd-upgrade-20261014`; kein
 | BU-04 | bestehender AIAdapter/Whiteboard/AI-Space | BU-03 | Gespräch/Folge/Rückfrage/Vorschau/Verwerfen, sichere persistente Übernahme und echte lokale KI geprüft |
 | BU-05 | bestehende und neue zielgerichtete tests, Architektur/README/Abnahme | BU-02–04 | echte durchgängige Browserregression, Zoom/DE/EN/kleines Fenster/Fehler, eindeutige Version und erfolgreicher finaler Konzeptabgleich |
 Schritte gleich gewichtet; 100 Prozent erst nach allen Abschlusskriterien. Reiner Backend-Erfolg zählt nicht als Browserabnahme. Nutzerbewertung folgt separat.
+
+
+## Gesprächs-Zwischenstand · 14.10.2026 · 18:58 Europe/Berlin
+
+### Auftrag und Quellen
+Der Nutzer hat den Umbau-Prompt erhalten; am 14.10.2026 wurde dessen vollständiger Inhalt in die Mac-Zwischenablage geschrieben und zurückgelesen (9135 Zeichen). Der bereits oben enthaltene Abschnitt „Verbindlicher Umbau · Nutzerauftrag 14.10.2026 · Version 0.2“ enthält den konkreten Ausführungsplan. Dieser Gesprächsstand ersetzt keine Implementierungsabnahme und startet keine zusätzliche KI-Session.
+
+### Vollständiger besprochener Änderungsumfang
+- Name BlockDesigner: ein Wort, B und D groß.
+- Kompaktes eigenständiges Header-Modul: Ebenen, Struktur/Gestaltung, Raster, kompakter DE/EN-Wechsel nach ThreadDesk, Hilfe und Sidebar-Schalter. Verschiebbarkeit des Headers bleibt offene Idee.
+- Beide Sidebars unabhängig aus-/einblendbar und in der Breite verstellbar; Workspace erhält frei werdende Breite. Sichtbarkeit und Breiten merken.
+- H öffnet übersichtliche Hilfe mit sämtlichen tatsächlich verfügbaren Shortcuts; gemeinsame Definition mit Eingabesteuerung, Fokus-/Escape-Verhalten beachten.
+- Shift-Mehrfachauswahl gemeinsam mit Space greifen, bewegen und absetzen; Abstände erhalten, Eltern/Kinder nicht doppelt bewegen, ganze Auswahl am Rand begrenzen.
+- Monitor über gesamte App-Sicht frei verschiebbar; Position merken und nach Fensterverkleinerung erreichbar halten.
+- Raster feiner/gröber mit kompakter Abstandsanzeige; gemeldeten Feiner-Fehler konkret prüfen. Behauptete Erstklick-Reproduktion nicht mit dem im Plan dokumentierten Grenzfehler verwechseln.
+- Kompakte Farbauswahl und niedrig startende, automatisch wachsende und wieder schrumpfende Chateingabe; weniger Scrollbedarf.
+- Dauertexte unter der Entwurfsfläche in Hilfe verlagern; wichtige Status-/Fehlermeldungen bei Bedarf zugänglich lassen.
+- Projektbezogener KI-Gesprächsverlauf mit verständlichen Folgeaufträgen, Rückfragen bei wesentlicher Mehrdeutigkeit, Vorschau/Übernehmen/Verwerfen für größere Änderungen und klarer Status/Zielauswahl.
+- Undo/Redo: zusammengehörige KI-Aktionen als ein Schritt, außerdem sinnvolle Gestengrenzen.
+- Dauerhaftes Speichern/Wiederöffnen von Projekt und MySpace; automatische dauerhafte Snapshots vor jeder abgeschickten Chateingabe und zugehöriger Ergebnisstand nach Übernahme. Auftrag, Auswahl, Revision, Gesprächsbezug und Zeitpunkt erhalten.
+- Frühere Stände wie eine lokale Wiederherstellungshistorie aufrufbar. Vor Restore aktuellen Zustand sichern; neuere Stände erhalten; Wiederherstellung als neuer Stand ohne erneute Ausführung alter KI-Aufträge. Speicherfehler sichtbar; keine ungesicherte KI-Übernahme. Kein Schutz vor Datenträgerverlust durch bloße lokale Snapshots behaupten.
+- Für diesen, den nächsten und übernächsten Umbau: bestehende Module weiterverwenden, kleine Schnittstellen, eine Shortcutquelle, gemeinsame Design-Tokens, versionierte Datenformate/Migrationen, wiederverwendbare echte Nutzerablauf-Prüfungen und knappe aktualisierte Architekturdokumentation. Kein pauschales Refactoring, keine neue Frameworkschicht ohne Bedarf.
+
+### Stand und Grenzen
+Der Nutzer hat Version 0.1.0 grundsätzlich positiv bewertet, ausdrücklich ohne vollständige eigene Prüfung. Gemeldete Bedienprobleme sind Nutzerfeedback; die frühere technische 35-Prüfungen-Abnahme ersetzt diese Bewertung nicht. Im aktuellen Pre-Plan liegt bereits ein konkreter BU-01–BU-05-Umbauplan vor. Der jetzige Sicherungsschritt hat den laufenden Umbau weder verändert noch dessen Fortschritt oder Fertigstellung geprüft. Status ausschließlich aus aktuellen Code-/Abnahmebelegen ableiten.
+Mikrofon, Webseiten-/Dateiimport, Export, Symbolbibliothek, MCP und native Apps bleiben spätere Ausbaustufen; lokales Speichern und Snapshots sind durch den aktuellen Auftrag jetzt ausdrücklich in den Umfang aufgenommen.
+
+### Wiederfinden und Sicherung
+Maßgebliche Quellen bleiben die drei BD-Dateien im bestehenden Ordner. Notion „Plan — Design Editor“ und „Brainstorm — Design Editor“ sind Wegweiser. Versionierte Sicherung unter landjunge/blockdesign/docs/concept; dort keine unabhängig gepflegte Konzeptkopie. Automatischer einseitiger Abgleich alle 300 Sekunden bei angemeldetem Benutzer; manuell über sync-concepts.py --verify. Konflikte/Fehler in .git/concept-sync-state.json prüfen, nicht überschreiben. Keine Garantie einer automatischen Wiederaufnahme dieses Chats.
