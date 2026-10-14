@@ -79,7 +79,7 @@ class Handler(SimpleHTTPRequestHandler):
                 parent=next((t for t in previous if t['task_id']==c['parent_task_id']),None)
                 if c['parent_task_id'] is not None and parent is None:raise ContractError('taskConflict')
                 relevant=([t for t in previous if t['task_id']!=parent['task_id']][-1:]+[parent]) if parent else previous[-2:]
-                turns=[{'task_id':t['task_id'],'instruction':t['instruction'],'summary':t.get('reply',{}).get('summary',''),'question':t.get('clarification',{}).get('question') or t.get('reply',{}).get('question',''),'box_ids':t['box_ids'],'status':t['status'],'actions':t.get('reply',{}).get('actions',[])} for t in relevant]
+                turns=[{'task_id':t['task_id'],'instruction':t['instruction'],'summary':t.get('reply',{}).get('summary',''),'question':t.get('clarification',{}).get('question') or t.get('reply',{}).get('question',''),'box_ids':t['box_ids'],'status':t['status'],'actions':t.get('reply',{}).get('actions',[]),**({'proposals':t.get('reply',{}).get('proposals',[])} if any('proposals' in turn for turn in c['turns']) else {})} for t in relevant]
                 if turns!=c['turns'] or c['selection_changed']!=(bool(parent) and parent['box_ids']!=packet['box_ids']):raise ContractError('taskConflict')
             self.reply(self.server.adapter.submit(packet),202)
         except (ContractError,ValueError) as e:self.reply({'error':str(e) if isinstance(e,ContractError) else 'invalidReply'},400)

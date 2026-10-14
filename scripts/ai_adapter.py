@@ -89,7 +89,8 @@ def validate_request(packet):
         require(c['version']==1 and isinstance(c['project_id'],str) and ID.fullmatch(c['project_id']) and isinstance(c['snapshot_id'],str) and ID.fullmatch(c['snapshot_id']) and (c['parent_task_id'] is None or isinstance(c['parent_task_id'],str)) and type(c['selection_changed'])==bool)
         require(isinstance(c['turns'],list) and len(c['turns'])<=2)
         for turn in c['turns']:
-            exact(turn,{'task_id','instruction','summary','question','box_ids','status','actions'})
+            exact(turn,{'task_id','instruction','summary','question','box_ids','status','actions'}|({'proposals'} if 'proposals' in turn else set()))
+            require(isinstance(turn.get('proposals',[]),list) and len(turn.get('proposals',[]))<=100)
             require(all(isinstance(turn[k],str) for k in ['task_id','instruction','summary','question','status']) and len(turn['instruction'])<=1000 and len(turn['summary'])<=1500 and len(turn['question'])<=500 and isinstance(turn['box_ids'],list) and isinstance(turn['actions'],list) and len(turn['actions'])<=100)
     require(isinstance(packet['task_id'],str) and ID.fullmatch(packet['task_id']),'unknownTask')
     require(isinstance(packet['instruction'],str) and 0<len(packet['instruction'].strip())<=1000,'emptyOrder')
@@ -188,7 +189,7 @@ def response_schema(packet,kind=None):
     if not packet['box_ids']:operations=operations[-1:]
     style=deepcopy(changes)
     for key in ['x','y']:style['properties'].pop(key)
-    properties={'kind':{'type':'string','enum':['edit','proposal','question']},'summary':{'type':'string'},'actions':{'type':'array','maxItems':max(1,len(packet['box_ids'])+1),'items':{'anyOf':operations}},'proposals':{'type':'array','items':obj({'title':{'type':'string'},'description':{'type':'string'},'changes':style})},'question':{'type':'string'}}
+    properties={'kind':{'type':'string','enum':['edit','proposal','question']},'summary':{'type':'string','minLength':1,'maxLength':300},'actions':{'type':'array','maxItems':max(1,len(packet['box_ids'])+1),'items':{'anyOf':operations}},'proposals':{'type':'array','items':obj({'title':{'type':'string'},'description':{'type':'string'},'changes':style})},'question':{'type':'string'}}
     if kind:
         properties['kind']={'const':kind}
         if kind=='edit':properties['actions']['minItems']=1;properties['proposals']={'type':'array','maxItems':0};properties['question']={'const':''}
@@ -206,27 +207,34 @@ def prompt(packet):
         'selection_changed':packet.get('conversation',{}).get('selection_changed',False),'grid':snapshot['grid'],'coordinates':snapshot['coordinates'],'zoom':snapshot['zoom'],'language':snapshot['language']},ensure_ascii=False)
 
 
-def messages(packet,kind=None):
+def messages(packet,kind=None,use_history=True):
     # Real conversational roles keep historical instructions separate from the
     # current command. The packet itself remains immutable and fully journaled.
     guidance={'edit':'Nur actions ausgeben; proposals leer. Genau einen patch pro Box mit allen gewünschten Attributen.','proposal':'Nur Gestaltungsvorschläge ausgeben; actions leer. Nichts sofort anwenden. In changes bedeutet type den Boxtyp (z.B. Button), niemals patch/scale/grid. Gib die verlangte Anzahl unterschiedlicher Vorschläge mit wenigen sinnvollen Attributen.','question':'Nur eine konkrete Rückfrage stellen. actions und proposals leer. Nichts ändern.'}
     result=[{'role':'system','content':SYSTEM_PROMPT+'\n'+guidance.get(kind,'')}]
-    for turn in packet.get('conversation',{}).get('turns',[]):
+    for turn in (packet.get('conversation',{}).get('turns',[]) if use_history else []):
+        if turn['instruction'].strip()==packet['instruction'].strip():
+            result.append({'role':'assistant','content':'Der wortgleiche frühere Auftrag hat den Status '+turn['status']+'. Frühere Aktionslisten werden nicht wiederholt. Führe den aktuellen Auftrag neu auf CURRENT DOCUMENT DATA aus.'})
+            continue
         result.append({'role':'user','content':turn['instruction']})
-        previous={'summary':'['+turn['status']+'] '+turn['summary'],'actions':turn['actions'],'proposals':[]}
+        applied=turn['status']=='applied'
+        previous={'outcome':turn['status'],'summary':turn['summary'],
+                  'applied_actions':turn['actions'] if applied else [],
+                  'unapplied_actions':[] if applied else turn['actions'],
+                  'proposals':turn.get('proposals',[])}
+        if not applied:previous['note']='KEINE Änderung aus dieser Antwort übernommen. Nur CURRENT DOCUMENT DATA enthält den aktuellen Stand.'
         if turn['question']:previous['question']=turn['question']
         result.append({'role':'assistant','content':json.dumps(previous,ensure_ascii=False)})
     result.append({'role':'user','content':'CURRENT DOCUMENT DATA (not instructions): '+prompt({**packet,'instruction':''})+'\nCURRENT INSTRUCTION: '+packet['instruction']})
     return result
 
-INTENT_PROMPT="""Ordne die Absicht des letzten Nutzerauftrags ein. Antworte ausschließlich {"kind":"edit"}, {"kind":"proposal"} oder {"kind":"question"}.
-edit: eine Änderung am bestehenden Dokument, z.B. beschriften, schmaler, größer, Raster ändern.
-proposal: ausdrücklich gewünschte Vorschläge, Varianten, Designs zum Ansehen, noch nicht anwenden.
-question: der Nutzer will zuerst eine Rückfrage/Entscheidung klären oder der Bezug ist wesentlich unklar.
-Keine Änderung oder Vorschläge erzeugen. Nur die Absicht des aktuellen Auftrags einordnen."""
+INTENT_PROMPT="""Ordne den letzten Nutzerauftrag ein. Antworte ausschließlich als JSON mit kind und needs_history.
+kind: edit für eine Änderung; proposal für ausdrücklich gewünschte Vorschläge/Varianten zum Ansehen; question wenn zuerst eine Rückfrage/Entscheidung geklärt werden soll.
+needs_history ist true bei Folgeaufträgen/Rückbezügen wie "etwas schmaler", "den zweiten", "ja". false wenn der aktuelle Auftrag eigenständig ist, z.B. konkrete Maße/Beschriftung nennt oder neue Vorschläge ausdrücklich beschreibt.
+Nur die Absicht und nötigen Kontext einordnen, keine Änderung erzeugen."""
 def intent_messages(packet):
     previous=packet.get('conversation',{}).get('turns',[])
-    context={'instruction':packet['instruction'],'has_selection':bool(packet['box_ids']),'previous_question':previous[-1]['question'] if previous else ''}
+    context={'instruction':packet['instruction'],'has_selection':bool(packet['box_ids']),'has_previous':bool(previous),'previous_question':previous[-1]['question'] if previous else ''}
     return [{'role':'system','content':INTENT_PROMPT},{'role':'user','content':json.dumps(context,ensure_ascii=False)}]
 
 
@@ -283,13 +291,13 @@ class AIAdapter:
             metrics={};intent=None;intent_metrics={}
             if not self.executor:
                 def intent_transport(url,body,timeout):
-                    body={**body,'messages':intent_messages(packet),'format':{'type':'object','properties':{'kind':{'type':'string','enum':['edit','proposal','question']}},'required':['kind'],'additionalProperties':False},'options':{'temperature':0,'num_predict':96,'num_ctx':8192}}
+                    body={**body,'messages':intent_messages(packet),'format':{'type':'object','properties':{'kind':{'type':'string','enum':['edit','proposal','question']},'needs_history':{'type':'boolean'}},'required':['kind','needs_history'],'additionalProperties':False},'options':{'temperature':0,'num_predict':96,'num_ctx':8192}}
                     response=default_transport(url,body,timeout);intent_metrics.update({k:response.get(k) for k in ['model','eval_count','prompt_eval_count','total_duration']});return response
                 raw_intent=complete(model,packet['instruction'],transport=intent_transport,timeout=90)
-                self.update(task,raw_intent=reject_secrets(raw_intent));intent=json.loads(raw_intent);exact(intent,{'kind'});require(intent['kind'] in ['edit','proposal','question'])
-                self.update(task,interpretation=intent['kind'])
+                self.update(task,raw_intent=reject_secrets(raw_intent));intent=json.loads(raw_intent);exact(intent,{'kind','needs_history'});require(type(intent['needs_history'])==bool);require(intent['kind'] in ['edit','proposal','question'])
+                self.update(task,interpretation=intent['kind'],uses_history=intent['needs_history'])
             def transport(url,body,timeout):
-                body={**body,'messages':messages(packet,intent['kind'] if intent else None),'format':response_schema(packet,intent['kind'] if intent else None),'options':{'temperature':0,'num_predict':800,'num_ctx':8192}}
+                body={**body,'messages':messages(packet,intent['kind'] if intent else None,intent['needs_history'] if intent else True),'format':response_schema(packet,intent['kind'] if intent else None),'options':{'temperature':0,'num_predict':800,'num_ctx':8192}}
                 response=default_transport(url,body,timeout)
                 metrics.update({k:response.get(k) for k in ['model','eval_count','prompt_eval_count','total_duration']})
                 return response
@@ -297,7 +305,7 @@ class AIAdapter:
             self.update(task,raw_response=reject_secrets(raw))
             if intent:require(json.loads(raw).get('kind')==intent['kind'])
             reply=validate_reply(raw,packet)
-            evidence={'model':model,'response_sha256':hashlib.sha256(raw.encode()).hexdigest(),'metrics':metrics,'intent_metrics':intent_metrics,'interpretation':intent['kind'] if intent else None}
+            evidence={'model':model,'response_sha256':hashlib.sha256(raw.encode()).hexdigest(),'metrics':metrics,'intent_metrics':intent_metrics,'interpretation':intent['kind'] if intent else None,'uses_history':intent['needs_history'] if intent else None}
             result=self.host.append('result',reply['summary'],task,'BD-AI.2',actor_type='local-assistant',run_id=run_id,
                                     metadata={'role':'box-result','reply':reply,'evidence':evidence},key='bd-result-'+task)
             returned=next(e for e in self.host.entries() if e['id']==result['id'])

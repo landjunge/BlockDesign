@@ -229,7 +229,20 @@ export function createWhiteboardBridge(store, request = fetch, projects = null) 
         await checkpoint(task, 'clarificationSnapshot');
       } else if (reply.actions.length) {
         // candidate validates the entire batch, including geometry, atomically.
-        store.candidate({ type: 'aiApply', task_id: task.task_id, actions: reply.actions });
+        const candidate = store.candidate({
+          type: 'aiApply',
+          task_id: task.task_id,
+          actions: reply.actions,
+        });
+        const actual = store.getState();
+        if (
+          JSON.stringify([candidate.boxes, candidate.grid]) ===
+          JSON.stringify([actual.boxes, actual.grid])
+        ) {
+          update(task.task_id, { status: 'noChange' });
+          await checkpoint(task, 'noChange');
+          return;
+        }
         if (!projects || isSmallChange(reply, store.getState())) await apply(task.task_id);
         else {
           update(task.task_id, { status: 'aiPreview' });
@@ -351,6 +364,7 @@ export function createWhiteboardBridge(store, request = fetch, projects = null) 
               box_ids: t.box_ids,
               status: t.status,
               actions: t.reply?.actions || [],
+              proposals: t.reply?.proposals || [],
             })),
           };
         }

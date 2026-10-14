@@ -151,6 +151,14 @@ def disk_failure(p):
  finally:commits.chmod(0o700)
  p.locator('[data-action="discard"]').click();wait(p,'blockDesigner.getState().tasks.at(-1).status==="discarded"');save_wait(p)
 
+def noop_reply_fixture(p):
+ old.fixture_connection(p);focus(p);p.keyboard.press('b');before=state(p)['boxes'];packet={}
+ def submit(route):
+  packet.update(route.request.post_data_json);route.fulfill(status=202,content_type='application/json',body=json.dumps({'task_id':packet['task_id'],'status':'waiting'}))
+ def poll(route):
+  reply={'version':1,'task_id':packet['task_id'],'revision':packet['revision'],'box_ids':packet['box_ids'],'summary':'Explicit no-effect safety fixture','actions':[{'type':'patch','box_id':packet['box_ids'][0],'changes':{'label':''}}],'proposals':[]};route.fulfill(status=200,content_type='application/json',body=json.dumps({'task_id':packet['task_id'],'status':'ready','reply':reply}))
+ p.route('**/api/tasks',submit);p.route('**/api/tasks/*',poll);p.locator('#order').fill('Explicit no-effect fixture');p.locator('#send').click();wait(p,'blockDesigner.getState().tasks.at(-1)?.status==="noChange"');assert state(p)['boxes']==before;assert not state(p)['tasks'][-1]['applied'];assert p.locator('[data-status="noChange"]').is_visible()
+
 def competing_tabs(p):
  focus(p);p.keyboard.press('b');save_wait(p);q=p.context.browser.new_page(viewport={'width':1440,'height':900})
  try:
@@ -161,7 +169,7 @@ def browser_corrupt_recovery(p):
  focus(p);p.keyboard.press('b');save_wait(p);good=state(p)['boxes'];p.keyboard.press('b');save_wait(p);pid=project_id(p);files=sorted((DATA/'projects'/pid/'commits').glob('*.json'));damaged=files[-1];damaged.write_text('{interrupted write');(damaged.parent/'.interrupted.tmp').write_text('{')
  p.reload();wait(p,'!!window.blockDesigner');assert state(p)['boxes']==good;assert 'storageCorrupt'==state(p)['ui']['notice'];assert damaged.exists();assert 'Beschädigter Stand' in p.locator('#status').inner_text()
 
-CASES=[('BU-HELP-FOCUS',help_focus),('BU-MULTI-FAMILY-BOUNDS',multi_group_bounds),('BU-SIDEBARS-MONITOR-GRID',layout_monitor_grid),('BU-PALETTE-CHAT-DE-EN',palette_chat_language),('BU-DURABLE-RESTART-RESTORE',durable_restart_restore),('BU-REAL-CONVERSATION-PREVIEW-UNDO',real_conversation_preview_undo),('BU-REAL-QUESTION-SELECTION',real_question_selection),('BU-REAL-MODEL-CLARIFICATION',real_model_clarification),('BU-DISK-FAILURE',disk_failure),('BU-COMPETING-TABS',competing_tabs),('BU-CORRUPTION-RECOVERY',browser_corrupt_recovery)]
+CASES=[('BU-HELP-FOCUS',help_focus),('BU-MULTI-FAMILY-BOUNDS',multi_group_bounds),('BU-SIDEBARS-MONITOR-GRID',layout_monitor_grid),('BU-PALETTE-CHAT-DE-EN',palette_chat_language),('BU-DURABLE-RESTART-RESTORE',durable_restart_restore),('BU-REAL-CONVERSATION-PREVIEW-UNDO',real_conversation_preview_undo),('BU-REAL-QUESTION-SELECTION',real_question_selection),('BU-REAL-MODEL-CLARIFICATION',real_model_clarification),('BU-DISK-FAILURE',disk_failure),('BU-NOOP-REPLY-FIXTURE',noop_reply_fixture),('BU-COMPETING-TABS',competing_tabs),('BU-CORRUPTION-RECOVERY',browser_corrupt_recovery)]
 def main():
  chosen=set(sys.argv[1:]);start_server();failed=0
  try:
@@ -174,7 +182,7 @@ def main():
     except Exception:failed+=1;row={'id':identity,'status':'fehlgeschlagen','seconds':round(time.time()-started,2),'error':traceback.format_exc()};page.screenshot(path=str(OUT/(identity+'-failure.png')))
     RESULTS.append(row);print(json.dumps(row,ensure_ascii=False),flush=True);(OUT/'results.json').write_text(json.dumps({'browser':browser.version,'results':RESULTS},ensure_ascii=False,indent=2));
     with (OUT/'history.jsonl').open('a') as f:f.write(json.dumps(row,ensure_ascii=False)+'\n')
-    page.close()
+    page.unroute_all(behavior="wait");page.close()
    browser.close()
  finally:stop_server()
  return int(bool(failed))
