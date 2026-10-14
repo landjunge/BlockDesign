@@ -1,0 +1,35 @@
+[
+  {
+    "task_id": "296e3455-8347-4e56-9d3c-64a3657f38fc",
+    "box_ids": [
+      "60d751d1-87d5-4b52-b078-379584c7d3e6"
+    ],
+    "revision": 1,
+    "activeLayer": 1,
+    "instruction": "Beschrifte die ausgewählte Box mit Weiter.",
+    "status": "ready",
+    "applied": false,
+    "received": true,
+    "reply": {
+      "version": 1,
+      "task_id": "296e3455-8347-4e56-9d3c-64a3657f38fc",
+      "revision": 1,
+      "box_ids": [
+        "60d751d1-87d5-4b52-b078-379584c7d3e6"
+      ],
+      "summary": "Beschrifte die ausgewüsschte Box mit Über über.",
+      "actions": [],
+      "proposals": []
+    },
+    "evidence": {
+      "model": "llama3.2:3b",
+      "response_sha256": "8228ab943563fa4abe885b5a5cc43ad46c324d2f9245fa4aaca132783e47dae2",
+      "metrics": {
+        "model": "llama3.2:3b",
+        "eval_count": 38,
+        "prompt_eval_count": 699,
+        "total_duration": 48202600491
+      }
+    }
+  }
+]

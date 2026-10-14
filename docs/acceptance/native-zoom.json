@@ -1,0 +1,41 @@
+[
+  {
+    "zoom": 1.25,
+    "observed": {
+      "ratio": 2.5,
+      "width": 960,
+      "height": 553
+    },
+    "status": "bestanden",
+    "position": [
+      495,
+      315
+    ]
+  },
+  {
+    "zoom": 1.5,
+    "observed": {
+      "ratio": 3,
+      "width": 800,
+      "height": 461
+    },
+    "status": "bestanden",
+    "position": [
+      495,
+      315
+    ]
+  },
+  {
+    "zoom": 2.0,
+    "observed": {
+      "ratio": 4,
+      "width": 600,
+      "height": 346
+    },
+    "status": "bestanden",
+    "position": [
+      495,
+      315
+    ]
+  }
+]

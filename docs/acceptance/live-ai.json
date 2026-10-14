@@ -1,0 +1,51 @@
+{
+  "task_id": "14420778-7061-4090-b913-1d138fe9a412",
+  "box_ids": [
+    "ee570785-124e-459d-b066-75ab51befe82"
+  ],
+  "revision": 23,
+  "activeLayer": 1,
+  "instruction": "Beschrifte die ausgewählte Box mit Weiter.",
+  "status": "applied",
+  "applied": true,
+  "received": true,
+  "reply": {
+    "version": 1,
+    "task_id": "14420778-7061-4090-b913-1d138fe9a412",
+    "revision": 23,
+    "box_ids": [
+      "ee570785-124e-459d-b066-75ab51befe82"
+    ],
+    "summary": "Ändern der Box-Eigenschaften",
+    "actions": [
+      {
+        "type": "patch",
+        "box_id": "ee570785-124e-459d-b066-75ab51befe82",
+        "changes": {
+          "label": "Weiter"
+        }
+      }
+    ],
+    "proposals": [
+      {
+        "title": "Änderung der Box-Farbe",
+        "description": "Ändert die Box-Farbe auf ein neues Design",
+        "changes": {
+          "color": "#3498db"
+        },
+        "id": "cfa65487-8100-407a-9839-6742c87e6799",
+        "source_task": "14420778-7061-4090-b913-1d138fe9a412"
+      }
+    ]
+  },
+  "evidence": {
+    "model": "llama3.2:3b",
+    "response_sha256": "e18b3dbf1cf0b7d0e824c17e0ddfcb44c11217961521c680c49cd4892ac59560",
+    "metrics": {
+      "model": "llama3.2:3b",
+      "eval_count": 99,
+      "prompt_eval_count": 612,
+      "total_duration": 52094103527
+    }
+  }
+}

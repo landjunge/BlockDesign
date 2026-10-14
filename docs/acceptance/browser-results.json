@@ -1,0 +1,61 @@
+{
+  "browser": "Google Chrome 155.0.8059.40",
+  "url": "http://127.0.0.1:5190",
+  "results": [
+    {
+      "id": "BD-02-BROWSER",
+      "status": "bestanden",
+      "seconds": 0.46
+    },
+    {
+      "id": "BD-03-AXES",
+      "status": "bestanden",
+      "seconds": 0.48
+    },
+    {
+      "id": "BD-03-BOUNDS",
+      "status": "bestanden",
+      "seconds": 1.27
+    },
+    {
+      "id": "BD-04-GRID-MONITOR-ZOOM",
+      "status": "bestanden",
+      "seconds": 0.56
+    },
+    {
+      "id": "BD-05-TRANSFER-CHILDREN",
+      "status": "bestanden",
+      "seconds": 0.73
+    },
+    {
+      "id": "BD-06-ATTR-FOCUS-VIEWS",
+      "status": "bestanden",
+      "seconds": 0.73
+    },
+    {
+      "id": "BD-08-DE-EN-DESKTOP",
+      "status": "bestanden",
+      "seconds": 1.17
+    },
+    {
+      "id": "BD-07-LIVE-CHANGE",
+      "status": "bestanden",
+      "seconds": 53.61
+    },
+    {
+      "id": "BD-07-LIVE-PROPOSALS",
+      "status": "bestanden",
+      "seconds": 48.14
+    },
+    {
+      "id": "BD-07-INVALID-FIXTURE",
+      "status": "bestanden",
+      "seconds": 0.58
+    },
+    {
+      "id": "BD-07-STALE-DUPLICATE-DISCONNECT-FIXTURE",
+      "status": "bestanden",
+      "seconds": 0.81
+    }
+  ]
+}

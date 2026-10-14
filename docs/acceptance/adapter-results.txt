@@ -1,0 +1,13 @@
+test_dimensions_font_and_grid_limits (__main__.AdapterSafety.test_dimensions_font_and_grid_limits) ... ok
+test_identity_code_css_and_nonfinite_rejected (__main__.AdapterSafety.test_identity_code_css_and_nonfinite_rejected) ... ok
+test_packet_revision_targets_coordinate_contract_and_context_bound (__main__.AdapterSafety.test_packet_revision_targets_coordinate_contract_and_context_bound) ... ok
+test_parent_cycle_and_moving_children_bounds (__main__.AdapterSafety.test_parent_cycle_and_moving_children_bounds) ... ok
+test_proposals_have_no_positions_or_executable_values (__main__.AdapterSafety.test_proposals_have_no_positions_or_executable_values) ... ok
+test_real_request_contract (__main__.AdapterSafety.test_real_request_contract) ... ok
+test_reply_extra_fields_wrong_structure_and_large_values (__main__.AdapterSafety.test_reply_extra_fields_wrong_structure_and_large_values) ... ok
+test_unknown_or_locked_targets (__main__.AdapterSafety.test_unknown_or_locked_targets) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.004s
+
+OK
