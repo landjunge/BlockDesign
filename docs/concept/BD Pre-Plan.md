@@ -12,6 +12,12 @@ Vorhandene Module, Schnittstellen und Tests nutzen. Keine zusätzlichen ThreadDe
 Eine maßgebliche Objektstruktur: ID, fortlaufende Nummer, Orientierungsfarbe, Ebene, Typ, X/Y, Breite/Höhe, Rundung, Gestaltungsfarbe, Schrift, Beschriftung, Modulzuordnung; geordnete Auswahl, Zustandsrevision, Raster und Dokumentmaße.
 Ursprung oben links (0,0), X nach rechts, Y nach unten; unten rechts (Dokumentbreite,Dokumenthöhe). Zoom verändert Dokumentkoordinaten nicht. Für den ersten Test werden Dokumentmaße ausdrücklich initialisiert; kein stiller Größenwechsel bei Fensteränderung.
 
+## Modulare Architektur — verbindliche Nutzerpräzisierung
+Das gesamte Tool wird wie die anderen Werkzeuge modulbasiert aufgebaut. Vor Umsetzung vorhandene Modulverträge und wiederverwendbare Bausteine prüfen und nutzen; kein monolithischer Ein-Datei-Ausbau und kein konkurrierendes Modulframework.
+Klare Zuständigkeiten für gemeinsames Box-/Dokumentmodell, Tastatur-/Maussteuerung, Workspace-Darstellung, Ebenen/Raster, Auswahl/Attribute/Module, MySpace, KI-Space und den bestehenden Whiteboard-KI-Adapter. Die konkrete Dateiaufteilung folgt vorhandenen Verträgen und tatsächlichem Bedarf, nicht einer Pflicht zu einem Framework oder einer Datei je Begriff.
+Ein maßgeblicher Zustand mit versionierten, validierten Aktionen; Struktur- und Gestaltungsansicht sowie KI-Anschluss greifen über kleine definierte Schnittstellen darauf zu. Keine mehrfach gepflegten Boxzustände, keine direkten Datenbankzugriffe anderer Produkte. Fachliche Box-Module mit Kindern bleiben von Softwaremodulen begrifflich getrennt.
+Abnahme zusätzlich: Modulgrenzen und Start-/Integrationsvertrag dokumentiert, zentrale Bedienabläufe über die echten Modulgrenzen getestet. Modulare Architektur ist Bestandteil der gesamten Umsetzung BD-01 bis BD-08, keine spätere Nachrüstung.
+
 ## BD-01 — Anschluss und Start
 Vorhandenen Zielhost/Modulvertrag und Whiteboard-Anschluss lesen. Tatsächliches GitHub-Remote prüfen. Browserlaufzeit, Startbefehl und Modulgrenzen dokumentieren; vorhandenen einfachen Projektweg verwenden.
 Abschluss: Leeres Modul startet sichtbar; Repository-Zuordnung und ausführende Session sind belegt.
