@@ -82,4 +82,56 @@ Abhängigkeiten: 01 → 02; danach 03/04/05 auf abgestimmten Schnittstellen, 06 
 Acht gleich gewichtete Pakete; Teilgewichte summieren sich je Paket zu dessen Gewicht. 100 Prozent erst nach BD-08. Günstigste geeignete zugelassene KI und vorhandene deterministische Wege nutzen.
 
 ## Übergabestatus
-Plan konsolidiert. Noch kein Whiteboard-Bauauftrag zugestellt und keine ausführende KI-Übernahme bestätigt. Nächster Schritt: bestehende Partner/Session prüfen, BD-01 mit konkreten Teilaufgaben übergeben und den oben beschriebenen Rückmeldezyklus tatsächlich beobachten.
+Am 14.10.2026 direkt durch den Nutzer an die aktive Codex-Session `01a13ae2-819a-7442-8789-a7e7c4f1cc94` zugestellt. Übernahme und erste echte Arbeit im Whiteboard-Thread `2e1032dcf420` bestätigt. Kein rekursiver Sessionstart. Gesamtauftrag `bd-build-20261014`, Paketaufträge `bd-01` bis `bd-08`; Fortschritt ausschließlich nach belegten Abschlusskriterien.
+
+## Konkretisierte Architektur und Baufolge · 14.10.2026
+Diese Ergänzung präzisiert die oben erhaltenen Verträge. Bestehende Historie und Bedienentscheidungen bleiben verbindlich.
+
+### Geprüfter Anschluss und Repository
+`/Users/landjunge/blockdesigner` war leer und kein Git-Repository. `landjunge/blockdesigner` existierte nicht. `landjunge/blockdesign` enthält den alten defekten Ein-Datei-Prototyp und die automatisch gesicherten Konzepte; `landjunge/block-design` verweist ebenfalls auf diese Sicherung. Deshalb wird **blockdesign** im gewünschten lokalen Workspace verwendet, Branch `feat/modular-block-designer`. Kein Repository wird umbenannt oder gelöscht. Die kurze alte README ist historisch und wird an die Umsetzung angepasst.
+ThreadDesk-Modulvertrag: `ModuleManifest`, `ModuleRegistry`, `ModuleRuntime`, `ModuleContext`; Whiteboard nur `read_whiteboard`/`append_whiteboard`. Gepinnter vorhandener Checkout `/Users/landjunge/threaddesk-worktrees/ordinal-lock/src`, Commit `3b6f3fa`, mit serialisiertem append-only Store; kein Eingriff in dessen ungesicherte Arbeit. Modul `block-designer`: Whiteboard lesen/anhängen, lokaler Ollama-Connector, Browseransicht, keine weiteren Kernrechte. Bestehendes lokales `llama3.2:3b` über `services.ollama_local`; keine bezahlten Aufrufe oder Agentenstarts. Die Hausmeister-Zusammenfassungslogik passt fachlich nicht auf Boxaktionen; der Produktadapter nutzt dessen vorhandenen lokalen Transport und Modulgrenze mit einem begrenzten Boxantwortvertrag.
+Gemeinsamer Designkern: unveränderte lokale `networkpunkt.css` von ThreadDesk `b0b6815`, SHA-256 `98371bd9edc96fb940a0e0de34933740fed1062b510aa516498fcb53e112591e`.
+
+### Zuständigkeiten und Schnittstellen
+| Bereich / Dateien | Verantwortung und erlaubte Abhängigkeiten |
+| --- | --- |
+| `src/core/model.js`, `geometry.js`, `actions.js`, `store.js` | Ein Dokument mit Boxen, Auswahl und Revision; reine Geometrie; validierte atomare Aktionen v1. Alle anderen Module lesen über `getState`, verändern nur über `dispatch`; kein DOM im Kern. |
+| `src/core/palette.js` | Eine gemeinsame 16-Farben-Quelle für Attribute, Vorschläge und Rendern; Orientierungsfarben unabhängig davon. Kein bereits definiertes vollständiges 16-Farben-Artefakt in den geprüften Quellen gefunden; vorläufige nummerierte Grundpalette explizit dokumentieren. |
+| `src/input/controller.js` | Tastatur/Maus, Fokuswächter, relative Dokumentbewegung, Greifer, A-Vorschau; nutzt Kernaktionen und Workspace-Koordinaten. |
+| `src/workspace/render.js`, `layers-grid.js`, `monitor.js` | Beide Ansichten aus demselben Zustand; Zoom nur Darstellung; Raster, aktive Ebene und frei platzierbarer Monitor. |
+| `src/panels/selection.js` | Typ, Beschriftung, Primary/T, Kinderzuordnung; keine eigene Boxkopie. |
+| `src/panels/myspace.js` | Behaltene Vorschläge im laufenden Dokument, direkt einsetzbar; Persistenz/Dateiimport bleiben spätere Stufen. |
+| `src/panels/ai-space.js`, `src/bridge/whiteboard.js` | Texteingabe, Aufgabenstatus, Vorschlagsauswahl; Bindung task_id/Revision/Box-IDs und zweite Validierung vor Anwendung. |
+| `scripts/host.py`, `ai_adapter.py`, `server.py` | Feste lokale Hostbindung; Task über bestehendes Whiteboard zustellen, auslesen, tatsächlich übernehmen; vorhandenen lokalen Modelltransport benutzen; JSON prüfen und Whiteboard-Rückgabe liefern. Kein Modellcode, keine fremden DB-Zugriffe, kein allgemeiner Dispatcher. |
+| `src/app.js`, `index.html`, `styles/` | Einmalige Montage und Designadapter, keinerlei zweite Zustandslogik; statischer ES-Modulweg ohne Framework/Buildschritt. |
+
+Datenfluss: Mensch → Eingabesteuerung/Panel → `dispatch({version:1,type,...})` → Validator/atomarer Reducer → ein neuer Zustand/Revision → abonnierte Ansichten. KI: abgesetzter Zustand → Auftrag mit Dokumentkontext → Whiteboard-task → read-back/claimed → lokales Modell → geprüfte deklarative Aktionen/Vorschläge → Whiteboard-result → Browserprüfung gegen aktuelle Revision → `dispatch`. Veraltetes bleibt sichtbar zurückgestellt; ein neuer Auftrag ist eine bewusste erneute Anfrage. Vorschläge dürfen behalten und später nach neuer Ziel-/Wertprüfung angewendet werden.
+Dokumentinitialisierung: ausdrücklich 1000 × 640 Pixel; Zoom initial 75 Prozent. Größenänderung des Fensters ändert diese Maße nie. Fachliche Box-Module sind Eltern in diesem Modell, keine Softwaremodule. Alle Kinder eines Moduls müssen auf derselben Ebene liegen; Umbenennung eines Eltern-Moduls in einen anderen Typ ist bei Kindern gesperrt. Keine automatische Skalierung/Verteilung von Kindern. T überträgt allgemeine Gestaltungsattribute; Schrift/Beschriftung auf texttragende Typen (alles außer Checkbox), keine funktionalen Bindungen.
+
+### Kleine freigegebene Schritte
+Jedes Paket wiegt 12,5 Prozent; jeder der beiden Schritte 6,25 Prozent am Gesamtauftrag. Verantwortlich ist jeweils die oben genannte aktive Codex-Session. Eingaben sind Konzeptquellen und die abgeschlossenen Abhängigkeiten. `claimed`, `progress`, `result`/`problem` tragen Paket-task_id und step_id; Gesamtpings tragen zusätzlich `bd-build-20261014`. Belege liegen im Code, Git-Verlauf und `docs/acceptance/`.
+
+| step_id | Dateien / Ziel | Abhängigkeit | Abschlusskriterium |
+| --- | --- | --- | --- |
+| BD-01.1 | bestehender Pre-Plan; Modul/Repo/Design/Whiteboard prüfen | keine | Quellen vollständig gelesen, begründete Zuordnung und konkrete Verträge versioniert; automatische Sicherung abgeglichen. |
+| BD-01.2 | `scripts/host.py`, `server.py`, `module.json`, `start.command`, `index.html` | 01.1 | Leere drei Spaces sichtbar startbar; Hostmanifest geprüft; echte Whiteboard-Zustellung und Feedback-Timer getestet. |
+| BD-02.1 | `core/model.js`, `store.js`, `actions.js` | 01 | Ein validiertes Dokument/Revision, aktive Ebene, Identität/Nummer, Auswahlreihenfolge. |
+| BD-02.2 | `workspace/render.js`, `layers-grid.js` | 02.1 | B=50×50 Mitte/+5 ohne Raster; Erschöpfungshinweis, helle Linie/Nummer/1-Pixel-Mitte, Ebenensperren sichtbar geprüft. |
+| BD-03.1 | `input/controller.js`, `core/geometry.js` | 02 | nächster Mittelpunkt, deterministischer Gleichstand, virtueller Greifer, relative Bewegung, D/F/D+F samt festem Anker. |
+| BD-03.2 | `core/actions.js`, `geometry.js` | 03.1 | ±1,1/Kehrwert, min.4, proportionale Gesamtbegrenzung, harte Grenzen einschließlich Kinder; Browserablauf bestanden. |
+| BD-04.1 | `layers-grid.js`, `geometry.js` | 03 | 20/2, 10/1, Kantenfang ohne Achsen-/Grenzverletzung, positive Rasterwerte geprüft. |
+| BD-04.2 | `monitor.js`, `render.js` | 04.1 | frei platzierbarer Monitor mit letzten tatsächlichen Werten; Zoom lässt Koordinaten unverändert. |
+| BD-05.1 | `panels/selection.js`, `core/actions.js` | 02/03 | Typwechsel erhalten Identität; Shift/T, passende Attribute inkl. Text, 16-Farben-Quelle. |
+| BD-05.2 | dieselben Dateien / fachliche Gruppierung | 05.1 | Kinderzuordnung, Zyklensperre, Modulbewegung mit Kindern, keine Kindskalierung; Grenzen bestanden. |
+| BD-06.1 | `render.js`, `app.js` | 05 | beide Ansichten zeigen denselben Zustand, typische Inhaltsdarstellung ohne neue Spezialwerkzeuge. |
+| BD-06.2 | `controller.js`, Palette/Attributpanel | 06.1 | A halten, Grundfarbe wählen, Rad=Helligkeit, sofortige Vorschau, Loslassen=Übernahme, Escape=Ausgangswert; Fokuswächter. |
+| BD-07.1 | `ai_adapter.py`, `bridge/whiteboard.js`, `ai-space.js` | 01/02 | echter Whiteboardauftrag mit Kontext, Übernahme und Modellantwort; gültige Aktion bewirkt sichtbare Änderung. |
+| BD-07.2 | dieselben Dateien, `myspace.js`, Prüfungen | 07.1 | Vorschlag auswählen/behalten/anwenden; ungültig/gesperrt/doppelt/veraltet/Abbruch sicher und sichtbar behandelt. |
+| BD-08.1 | `tests/`, `docs/acceptance/` | 01–07 | echte Browserfolge über alle Module; DE/EN, Fokus, Zoom, kleinere Ausschnitte, Langtext und alle Fehlerfälle; Fehler beheben/wiederholen. |
+| BD-08.2 | README, Abnahmebericht, bestehender Pre-Plan | 08.1 | startbarer Commit, Tastenhilfe, gewichteter Abschluss mit Belegen und Grenzen, Konzeptsicherung nach finaler Planänderung bestätigt. |
+
+### Konflikte, Testvarianten und Rückmeldungen
+Die historischen weißen 1280×768-Flächen und verzögerte Darstellung aus der README sind durch die Konzeptquellen und die spätere Zwei-Ansichten-/Desktop-Regel ersetzt. Der Destillat-Konflikt Struktur/Design ist damit für diesen Prototyp aufgelöst. Abstandsvorgabe/automatische Kinderverteilung bleiben laut BD-05 spätere Verfeinerungen. Browser können den Systemmauszeiger nicht beliebig versetzen; virtueller Greifer und relative Bewegung sind die festgelegte Umsetzung, kein behaupteter Systemzeigersprung.
+A ist vorläufige, konfliktfreie Testtaste. Farbmodus zuerst, Helligkeit fein per Rad. Diese Festlegung bleibt austauschbar. Drag des Monitor-Kopfs oder Tastaturpfeile verschieben das Monitorfenster. Shift-Klick ergänzt/toggelt Auswahl, Entfernen der Primary macht die nächste ausgewählte Box zur Primary. Leerer Klick leert Auswahl; Monitor behält zuletzt gewählte Werte. Freie Typen werden als Textetiketten dargestellt, ohne erfundene Funktion.
+Die allgemeine Workflow-Anweisung zur gegenseitigen neuen Codex/Grok-Session gilt für jene ausdrücklich beauftragte Konstellation; dieser direkte Auftrag verlangt keine neuen Sessions und verbietet Rekursion. Übernahme der laufenden Session ist durch direkte Zustellung und erste tatsächliche Arbeit belegt. Vorhandenen `whiteboard_feedback_watch.py` als begrenzten lokalen Timer nutzen, dessen Funktion mit kurzer Testfrist und die 60-Sekunden-Konfiguration separat nachweisen. Queue-Zustellung nur bei tatsächlich bestätigter Session-Verbindung behaupten; Whiteboard wird von dieser Session aktiv gelesen und Rückmeldungen read-back-geprüft. Kein automatisches Wecken dieser Chat-Sitzung behaupten.
+
