@@ -5,7 +5,7 @@ Startbares Browser-Prototyp-Modul mit Boxbedienung, zwei Ansichten, Attributmodu
 Quellen im selben Ordner: BD Brainstorm Destillat.md; BD Ziel Idee.md.
 Projektworkspace: /Users/landjunge/blockdesigner. GitHub-Ziel laut Nutzer: blockdesigner ohne Bindestrich; tatsächliches Remote vor Schreiben prüfen. Keine anderen Repositories löschen.
 Regeln: /Users/landjunge/threaddesk-worktrees/closed-chat-import/docs/usability/GOLDENRULES.MD (§§15–19 einschließlich späterer Desktop-Präzisierung); /Users/landjunge/.threaddesk/Workflow/Workflow-Planerstellung-fuer-andere-KIs.md. Regelstand vor Umsetzung abgleichen.
-Speichern/Export, Webseitenimport, Symbolbibliothek, MCP und Mikrofon sind spätere Ausbaustufen. Die vollständige Vision bleibt in den Quellen erhalten.
+Lokales Speichern/Snapshots sind seit dem unten präzisierten Umbau 0.2 Pflicht. Export, Webseitenimport, Symbolbibliothek, MCP und Mikrofon bleiben spätere Ausbaustufen. Die vollständige Vision bleibt in den Quellen erhalten.
 
 ## Gemeinsamer Bauvertrag
 Vorhandene Module, Schnittstellen und Tests nutzen. Keine zusätzlichen ThreadDesk-Kernrechte, kein zweiter Orchestrator und keine direkten Zugriffe auf fremde Datenbanken.
@@ -81,10 +81,10 @@ Jedes BD-Paket bei Vergabe in kleine prüfbare Teilaufgaben mit eigener step_id 
 Abhängigkeiten: 01 → 02; danach 03/04/05 auf abgestimmten Schnittstellen, 06 nach 05, 07 nach 01/02; 08 nach allen. Parallel nur mit klar getrennten Dateien beziehungsweise isolierten Arbeitsständen.
 Acht gleich gewichtete Pakete; Teilgewichte summieren sich je Paket zu dessen Gewicht. 100 Prozent erst nach BD-08. Günstigste geeignete zugelassene KI und vorhandene deterministische Wege nutzen.
 
-## Übergabestatus
+## Übergabestatus der Umsetzung 0.1
 Am 14.10.2026 direkt durch den Nutzer an die aktive Codex-Session `01a13ae2-819a-7442-8789-a7e7c4f1cc94` zugestellt. Übernahme und erste echte Arbeit im Whiteboard-Thread `2e1032dcf420` bestätigt. Kein rekursiver Sessionstart. Gesamtauftrag `bd-build-20261014`, Paketaufträge `bd-01` bis `bd-08`; Fortschritt ausschließlich nach belegten Abschlusskriterien.
 
-## Konkretisierte Architektur und Baufolge · 14.10.2026
+## Konkretisierte Architektur und Baufolge · 0.1-Historie · 14.10.2026
 Diese Ergänzung präzisiert die oben erhaltenen Verträge. Bestehende Historie und Bedienentscheidungen bleiben verbindlich.
 
 ### Geprüfter Anschluss und Repository
@@ -137,7 +137,7 @@ Die allgemeine Workflow-Anweisung zur gegenseitigen neuen Codex/Grok-Session gil
 
 
 
-## Technischer Abschlussstand · 14.10.2026
+## Technischer Abschlussstand 0.1 · 14.10.2026
 Implementiert im vorgesehenen Workspace, vorhandenes Remote `landjunge/blockdesign`, Branch `feat/modular-block-designer`, Produktversion 0.1.0. Geprüfter Produktcode `df2550390af3cd6c77b79cc5911d7c8c0b9e4d0f`; spätere Beleg-/Konzeptcommits ändern diesen geprüften Produktcode nicht. Start: `cd /Users/landjunge/blockdesigner && ./start.command`, Browser `http://127.0.0.1:5190`.
 
 | Paket | Ergebnis / konkrete Abnahme |
@@ -220,3 +220,56 @@ Maßgebliche Quellen bleiben die drei BD-Dateien im bestehenden Ordner. Notion �
 - Boxdaten und MySpace werden auch aus Undo-Frames über unveränderliche Inhaltsverweise wiederverwendet. Frühere Format-1-Stände mit eingebetteten Daten bleiben lesbar. Unbekannte künftige Formate werden nicht überschrieben. Prozess-Filelock und erwarteter Head schützen auch mehrere lokale Hostprozesse/Tabs.
 - Normale Bedienänderungen werden nach 500 ms Ruhe gesichert; ausstehende Sicherung steht im Header. Bei tatsächlichem Speicherfehler kein endloser automatischer Wiederholungsloop, sondern sichtbarer Fehler und „Erneut sichern“. Unbestätigte Eingaben bei abruptem Browser-/Stromausfall können fehlen; vor KI-Versand und vor sichtbarer KI-Übernahme ist dauerhafte Sicherung Pflicht. Kein externer Backupsicherheitsanspruch.
 - Neue Browserbelege und Projektdaten bleiben lokal unter ignoriertem `.runtime/`; Git enthält Code, Konzeptabgleich und Prüfaussagen. Die historische Abnahme 0.1.0 bleibt erhalten. Shortcut-Hilfe enthält auch den ergänzten Tastaturweg zur Sidebarbreite.
+
+
+## Gesprächsfortsetzung · 14.10.2026 · 19:55 Europe/Berlin
+
+Dieser Abschnitt sichert das weitere Brainstorming nach dem Zwischenstand 18:58. Er ist keine Beauftragung neuer Produktimplementierungen, keine bestätigte Fertigstellung des laufenden Umbaus und keine Behauptung, dass vorgeschlagene Integrationen bereits existieren. Vorherige Entscheidungen und Quellen bleiben erhalten.
+
+### Wiedereinstieg und Bedienentscheidungen
+Der Nutzer braucht nach Pausen einen verständlichen durchgehenden Bedienablauf, um BlockDesigner im geistigen Auge zu benutzen. Nicht mit der Architektur anderer Produkte verwechseln. Wiederaufnahme soll aktuellen Projektstand, letzte Handlung und nächsten offenen Schritt vermitteln; ein technischer Bericht allein erfüllt diesen Bedarf nicht.
+Bestätigt: zwei gebogene Buttons für Rückgängig/Wiederholen im Header; auf macOS Command-Z und Shift-Command-Z, Command-S für Sichern, zusätzlich Shift-S für manuellen Snapshot. Shift-S ausschließlich außerhalb von Texteingaben. Vor Umsetzung vorhandene Belegungen auf Konflikte prüfen, Hilfe aus derselben Shortcutquelle aktualisieren. Nicht als bereits implementiert ausgeben. Automatische Snapshots pro Chateingabe bleiben bestehen, manuelle Meilensteine ergänzen sie.
+Besprochen und zunächst hilfreich bewertet: letztes Projekt fortsetzen; Historie mit automatischen Snapshots und manuellen Meilensteinen; Stand ansehen und zurückholen ohne Verlust neuerer Stände. Kurze Namen wie „Layout steht“ sind ein Vorschlag, noch keine detailliert festgelegte Benennungsinteraktion.
+Korrektur der mündlichen Anleitung: B erstellt gemäß bestehendem Konzept eine 50×50-Box; ein freies Aufziehen ihrer Größe unmittelbar bei B wurde nicht beschlossen. D/F bleiben die festgelegte Achsensteuerung. Gewünschten bzw. beauftragten Umbau nicht ohne aktuelle Prüfung als laufendes Produktverhalten schildern.
+
+### Export — abgegrenzter zukünftiger Bereich
+Besprochen: separate bearbeitbare Projektdatei und unabhängig von der BlockDesigner-Bedienoberfläche nutzbarer Webseitenexport mit HTML/CSS und benötigten Medien. Projektdatei dient Wiederöffnen/Weiterbearbeiten, Webseitenpaket der Browserdarstellung bzw. Bereitstellung auf einem Webserver. Dies ist zukünftiger Umfang; bestehender Umbauauftrag wird dadurch nicht still erweitert.
+Wichtige Korrektur: statische Auslieferung kann JavaScript und Browserinteraktionen enthalten. „Alle Interaktionen später“ wurde als zu pauschal korrigiert. Export muss die ausdrücklich zugewiesenen Funktionen einschließlich benötigter Skripte/Dateien erhalten. Ein Typetikett „Button“ allein erzeugt noch kein Verhalten.
+Bei Import bestehender Seiten gilt das erhaltene Prinzip „Funktion bleibt, Optik darf tanzen“: verständliche Teile bearbeitbar, komplexe Teile intakt gekapselt. Backend-/Dienstabhängigkeiten sichtbar ausweisen; keine Schlüssel im Browserexport, keine still verlorenen Funktionen und keine falsche Funktionszusage bei fehlendem Dienst. Umfang und technische Exportverträge sind noch auszuarbeiten.
+Responsive Stapelung nicht neu als beschlossene Regel erfinden: vorhandenes Destillat enthält Anpassung von Elementgröße/-verteilung im Modul und Abstandsvorgabe durch zwei Buttons. Automatische Kinderverteilung war als spätere Verfeinerung eingeordnet. „Kein automatisches Mobilstapeln“ im Pre-Plan betrifft die Editoroberfläche, nicht pauschal die exportierte Website. Konkrete Breakpoints/Stapelregeln für den Export wurden nicht beschlossen; Nutzer wollte an dieser Stelle nicht unbemerkt einen Schritt weitergehen.
+
+### Audioplayer/Karaoke — ausdrücklich theoretisches Beispiel
+Webseite mit MP3-Player, Play, Stopp und Titel vor/zurück; Nutzer präzisierte Vor/Zurück als Titelwechsel, nicht Spulen. Zugeordneter Gesangstext soll synchron wie Karaoke erscheinen. Zeilen-/Wortzeitmarken bestimmen die Hervorhebung. HTML/CSS/Player-JavaScript/Audio und Text-Zeitdaten wären gemeinsame Exportbestandteile. Kein Bauauftrag für einen konkreten Player und keine dafür erstellte Webseite.
+Suno-MP3 diente als Beispieldatei. Recherche: offizielle Download-Dokumentation bestätigte keine automatisch enthaltenen synchronisierten Textmarken. Drittanbieter-Exporter dokumentieren Abruf vorhandener Suno-Alignments und Einbettung als SYLT bzw. LRC. Nicht daraus folgern, jeder normale Suno-MP3-Download enthalte bzw. enthalte nie diese Daten. Tatsächliche Datei zuerst prüfen; vorhandene Zeitmarken bevorzugen, erst bei Bedarf neu ausrichten. Keine konkrete MP3 wurde dafür geprüft.
+Quellen: https://help.suno.com/en/articles/13926081 und https://github.com/stevenke1981/suno-mcp . Drittanbieterfunktion ist keine offizielle Suno-Exportgarantie.
+
+### Austauschbare KI und Zusammenarbeit aller Produkte
+Nutzer betrachtet allgemeine Anwendungen, nicht nur den Beispielplayer. Externe KI wie DeepSeek ist eine mögliche Alternative zur lokalen KI; aktuelle Preise/Eignung wurden nicht bewertet. Ziel: austauschbarer Anbieteradapter, gemeinsame Auftragsdaten und gleiche Ergebnisprüfung. Eine exportierte fertige Playerseite braucht für gewöhnliches Abspielen keinen laufenden KI-Aufruf. Anbieterzugang nicht im Frontend oder exportierten Paket speichern.
+Explizites Nutzerziel: ALLE eigenständigen Tools sollen miteinander arbeiten. Dazu gehören gemeinsame Entscheidungen und später gezielt zuweisbarer Kontext, nicht nur technische API-Aufrufe. Produkte bleiben getrennt; vorhandene Rollen und Grenzen weiterverwenden. 4AllPass: Zugangsdaten/Freigabe; TollGate: Budget/Ressourcen; ThreadDesk: Kontext/Auftrag/Rückgabe; Gnom-Hub: Agentenkoordination; Agent Authority: Befugnis-/Delegationsnachweise gemäß eigenem Vertrag. Diese Rollenbeschreibung beweist keinen fertigen durchgängigen Anschluss.
+Lokale Bestandsprüfung am Gesprächstag: ThreadDesk besitzt dokumentierten stdio-MCP-Server sowie versionierte Handoff-/Return-Verträge; TollGate MCP, HTTP und OpenAI-kompatible Chatoberfläche plus DeepSeek-Provider; Gnom-Hub HTTP-Tools/MCP-lite, nicht als vollständiger MCP-Transport bestätigt; BlockDesigner ThreadDesk-Modul-/Whiteboardanschluss und weiterhin lokaler Ollama-Adapter. 4AllPass lokaler Freigabebroker über HTTP, heute raw_secret nach Allow, AVAILABLE_HANDOFF enthält nur raw_secret; vermittelter Aufruf ohne Schlüsselweitergabe fehlt. Capability-Dokumente sind Konzepte, keine Implementierung. Mehrere lokale Checkouts enthalten ungesicherte Änderungen; Bestandsbefunde sind keine Release-/Live-End-to-End-Abnahme. Keine kostenpflichtigen Modellaufrufe durchgeführt.
+Vorgeschlagene technische Basis, noch kein beschlossener Integrationsbau: vorhandene HTTP-/Modulanschlüsse für direkte Zusammenarbeit, MCP als KI-Werkzeugzugang zu denselben geprüften Funktionen, gemeinsame versionierte Auftrags-/Ergebnis-/Ereignisverträge. MCP ersetzt weder Befugnisprüfung, Budgetfreigabe noch Geheimnisschutz. Vorhandene neuere Sicherheitsentscheidungen gegen ältere Capability-Skizzen abgleichen; kein proprietäres Superprotokoll oder Produktverschmelzen.
+
+### Verbindliche Arbeitsregel: gemeinsamer Ursprung und bestehende Beschlüsse
+Ausdrücklich bestätigt: Bereits getroffene Entscheidungen müssen vor und während weiterem Brainstorming einbezogen werden. Neue Ideen dürfen gültige Beschlüsse nicht still überschreiben und keine späteren Bauaufträge erzeugen, die Apps beschädigen oder Produktgrenzen verletzen.
+Daraus für jeden nächsten Auftrag: gültige frühere Beschlüsse/Quellen referenzieren, neue Punkte als Idee/beschlossen/offene Frage kennzeichnen, Konflikte und betroffene Tools benennen. Der alte Beschluss bleibt gültig, bis der Nutzer seine Änderung ausdrücklich entscheidet; dann Änderung und ersetzten Beschluss nachvollziehbar verbinden.
+Ziel für die Wissensführung: ein gemeinsamer Ursprung in ThreadDesk mit stabilen referenzierbaren Punkten, Status, Herkunft/Version und Zuordnung zu allen betroffenen Tools. Später gezielte Zuweisung desselben Punktes an BlockDesigner, 4AllPass, TollGate, ThreadDesk, Gnom-Hub oder Agent Authority; keine auseinanderlaufenden unabhängigen Kopien. Übernahmen/Rückgaben auf diesen Ursprung beziehen. Bei neuer Entscheidung betroffene ältere Zuweisungen als prüfbedürftig erkennbar machen. Dies ist die gewünschte Arbeitsweise/Produktanforderung, kein Nachweis, dass automatische Konflikterkennung oder Verteilung bereits implementiert ist.
+Brainstorming ist keine automatische Ausführungserlaubnis. Theoretische Beispiele, Vorschläge, beschlossene Anforderungen, Bauauftrag und geprüfte Ergebnisse bleiben getrennt. Verlässlicher Wiedereinstieg: diesen Abschnitt und den aktuellen gültigen Plan lesen, bevor neue Empfehlungen oder Prompts entstehen.
+
+### Nächster offener Schritt
+Gemeinsame Wissens-/Entscheidungszuordnung mit den vorhandenen ThreadDesk-Strukturen und gültigen produktübergreifenden Beschlüssen abgleichen. Danach erst konkrete Integrationsaufträge je betroffenem Tool ableiten. Export und Beispielplayer bleiben getrennte zukünftige Themen. Kein neuer Integrationsprozess wurde mit diesem Sicherungsschritt gestartet.
+
+- Ergänzung aus der letzten Stilregression: Die vorhandene lokale KI unterscheidet in einem kurzen begrenzten ersten Modellaufruf edit/proposal/question; ein anschließender Aufruf im selben bestehenden Whiteboard-Job erhält die passende exklusive Antwortform. Vorschlagsaufträge können dadurch keine zusätzlichen Aktionslisten ausliefern. Beide Schritte benutzen denselben vorhandenen lokalen Transport, dieselben Task-/Snapshotbezüge und unabhängigen Validatoren; kein zweiter Orchestrator oder Agent. Echte Rollen und eindeutige Antwortformen verbesserten die geprüften Abläufe. Frühere Modellverwechslungen bleiben als fehlgeschlagene Zwischenläufe dokumentiert und zählen nicht als Abnahme.
+
+- Gesprächskontext nach der erneuten Abnahmepräzisierung: Die bestehende kurze Absichtserkennung entscheidet zusätzlich, ob ein Rückbezug nötig ist. Eigenständige Aufträge gehen mit aktuellen Ziel-/Dokumentdaten an die Erzeugung, Folgeaufträge erhalten die relevanten früheren Aufträge/Ergebnisse einschließlich Vorschlägen. Der vollständige Verlauf bleibt im Projekt und im gebundenen Auftrag. Verworfen/fehlgeschlagen/veraltet wird nicht als ausgeführte Aktion präsentiert. Bei wortgleichem erneutem Auftrag bleibt der frühere Status als Hinweis; alte Aktionslisten werden nicht erneut als Vorlage ausgegeben. Rückgaben ohne tatsächliche Inhaltsänderung heißen sichtbar „keine Änderung“, ohne vorgetäuschte Übernahme.
+
+
+## Technischer Umbauabschluss 0.2 · 14.10.2026
+Bestehende Module im vorgesehenen Workspace erweitert, Branch `feat/compact-project-history`, Remote weiterhin `landjunge/blockdesign`. Geprüfter Produktcode `d38415bc5fa77db039a682b2fa45bc8dcc901f25`; nachfolgende Konzept-/Abnahmecommits verändern diesen Produktcode nicht. Version 0.2.0. Start unverändert `./start.command`, Browser `http://127.0.0.1:5190`; Tastenübersicht H.
+
+BU-01 bis BU-05 technisch erfüllt: kompakter Header/Sidebars/Hilfe und Eingabekorrekturen; appweiter Monitor und konsistentes Raster; dauerhafte lokale Projekte/MySpace/Undo; Vorher-/Ergebnissnapshots, sichere Historie/Restore und Wiederanlauf; echte Whiteboard-/Ollama-Gespräche mit Folgeauftrag, Auswahlwechsel, Rückfrage und Vorschauentscheidung; wiederholbare tatsächliche Browserabnahme. 64 Prüfungen bestanden, keine im endgültigen Prüfstand fehlgeschlagen: 19 Kern-, 12 Adapter-, 5 Speicher- und 2 Hostprüfungen; 11 bisherige und 12 neue Chrome-Abläufe sowie 3 native Chrome-Zoomstufen. Auch Mac-Cmd-Undo/Redo und konkurrierende Tabs geprüft. Testdaten und neue Belege bleiben lokal Git-ignoriert, Projektdaten ausschließlich im privaten Produktordner.
+
+Abnahmebericht `/Users/landjunge/blockdesigner/docs/acceptance/REPORT.md`, Einzelergebnisse `docs/acceptance/v0.2.0-checks.json`, lokale Detailbelege `.runtime/acceptance-v02/` und `.runtime/upgrade-acceptance/`. Historische Abnahme 0.1.0 unverändert erhalten. Rote Zwischenläufe wurden nach tatsächlichen Korrekturen wiederholt und nicht als Erfüllung gezählt. Die geprüften echten KI-Vorschläge enthalten keine zusätzlich angewendeten Aktionen. Erneuter Auftrag nach Verwerfen, Übernahme und Gesamt-Undo sind im Browser bestanden.
+
+Grenzen bleiben ausdrücklich: fehlbares lokales Sprachverständnis und begrenzter Kontext, keine Latenzgarantie, keine automatische Kindskalierung oder Systemzeigersprünge; lokale Historie ist kein Schutz gegen Ausfall desselben Datenträgers. Normale ungesicherte Eingaben können bei abruptem Abbruch fehlen; Pflichtsicherungen vor KI-Versand/-Übernahme sind davon getrennt und geprüft. Mikrofon, Import/Export, Symbolbibliothek und MCP sowie Headerbeweglichkeit bleiben spätere Stufen/offene Idee. Andere Browser/Plattformen, physischer Stromausfall und anschließende Nutzerbewertung nicht geprüft. Kein externer technischer Blocker im erfüllten Umfang.
+
+Rückmeldekorrektur: Der erste Gesamttimer wurde durch ein Teilergebnis unter derselben task_id beendet. Bestehenden 60-Sekunden-Watcher erneut gestartet, abschließende Schritt-result unter `bd-upgrade-bu-04`/`bd-upgrade-bu-05`, Gesamtfortschritt unter `bd-upgrade-20261014`; kein ununterbrochener ursprünglicher Betrieb behauptet. Read-back und tatsächliche Timer-Nachfragen belegt. Gesamt-result erfolgt erst nach erfolgreichem finalem Konzeptabgleich, Versions-/Startprüfung und stoppt den begrenzten Watcher. Technische Erfüllung ist keine vorweggenommene Nutzerbewertung oder Erfüllung der gesamten Vision.
