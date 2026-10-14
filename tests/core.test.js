@@ -101,3 +101,7 @@ test('prospective durable commit shares the same undo calculation and retains tr
 test('changing layer during a gesture closes it before subsequent creations',()=>{
  const s=createStore();run(s,{type:'create'});const original=box(s);s.begin('move');run(s,{type:'grab',id:original.id});run(s,{type:'moveSelection',dx:40,dy:40});run(s,{type:'layer',layer:2});run(s,{type:'create'});assert.equal(state(s).boxes.length,2);run(s,{type:'undo'});assert.equal(state(s).boxes.length,1);assert.equal(state(s).boxes[0].x,515);run(s,{type:'undo'});assert.equal(state(s).boxes[0].x,original.x);
 });
+
+test('archived restored instructions cannot replay even with a matching revision',()=>{
+ const s=two(),id=box(s).id;run(s,{type:'taskAdd',task:{task_id:'archived',box_ids:[id],revision:state(s).revision,activeLayer:1,applied:false,archived:true}});const before=state(s).boxes;assert.equal(s.dispatch({type:'aiApply',task_id:'archived',actions:[{type:'patch',box_id:id,changes:{label:'Replay'}}]}).error,'staleReply');assert.deepEqual(state(s).boxes,before);
+});

@@ -209,7 +209,7 @@ export function createWhiteboardBridge(store, request = fetch, projects = null) 
   async function accept(payload) {
     const task = taskFor(payload.task_id);
     if (!task) throw Error('unknownTask');
-    if (task.applied || task.received || accepting.has(task.task_id)) return;
+    if (task.archived || task.applied || task.received || accepting.has(task.task_id)) return;
     accepting.add(task.task_id);
     try {
       const reply = validateReply(payload.reply, task);

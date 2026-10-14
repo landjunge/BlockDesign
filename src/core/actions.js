@@ -145,7 +145,7 @@ export function reduce(state, action) {
     case 'aiApply': {
       const t = s.tasks.find(t => t.task_id === a.task_id);
       if (!t || t.applied) throw new Error(t?.applied ? 'duplicateReply' : 'unknownTask');
-      if (t.revision !== s.revision) throw new Error('staleReply');
+      if (t.archived || t.revision !== s.revision) throw new Error('staleReply');
       if (s.ui.grabbed || s.ui.preview) throw new Error('finishGesture');
       if (!Array.isArray(a.actions) || a.actions.length > 100) throw new Error('invalidReply');
       for (const op of a.actions) {

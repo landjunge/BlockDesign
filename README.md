@@ -31,7 +31,7 @@ Dokument, MySpace, Gespräch und Undo/Redo liegen dauerhaft unter `~/Library/App
 
 MySpace → Historie zeigt frühere Stände. Ansehen verändert nichts; Wiederherstellen sichert zuerst den aktuellen Stand und erzeugt einen neuen mit Bezug zum gewählten Snapshot. Neuere Stände bleiben erhalten. Alte Aufträge werden dabei nicht erneut gestartet. Projekte lassen sich links auswählen, benennen und neu anlegen. Nach Serverneustart wird das zuletzt gewählte Projekt wieder geöffnet.
 
-KI-Aufträge verwenden den bestehenden Whiteboard-/Ollama-Weg und das bereits installierte lokale Modell aus `ai-config.json`. Folgeaufträge enthalten relevante vorherige Aufträge/Ergebnisse und die aktuelle Auswahl; ein Auswahlwechsel wird sichtbar benannt. Rückfragen können beantwortet werden. Bei Verbindungsabbruch zunächst „Status abrufen“; kein automatischer Modellneustart. Ungültige/duplizierte/veraltete Rückgaben und fremde Ziele werden nicht angewendet. Kein Modellcode wird ausgeführt.
+KI-Aufträge verwenden den bestehenden Whiteboard-/Ollama-Weg und das bereits installierte lokale Modell aus `ai-config.json`. Folgeaufträge enthalten relevante vorherige Aufträge/Ergebnisse und die aktuelle Auswahl; ein Auswahlwechsel wird sichtbar benannt. Rückfragen können beantwortet werden. Ohne Auswahl fragt zunächst BlockDesigner nach dem gewünschten Bezug; das ist klar von echten Modellantworten getrennt. Bei Verbindungsabbruch zunächst „Status abrufen“; kein automatischer Modellneustart. Ungültige/duplizierte/veraltete Rückgaben und fremde Ziele werden nicht angewendet. Kein Modellcode wird ausgeführt.
 
 Die lokale Historie schützt **nicht vor Ausfall desselben Datenträgers**. Projektdaten werden nicht nach GitHub oder an externe Dienste übertragen. Externe Backups, Mikrofon, Import/Export, Symbolbibliothek und MCP sind nicht Bestandteil dieses Umbaus. Sprachverständnis bleibt fehlbar; Vorschau und Rückfragen erleichtern die Kontrolle. Technische Abnahme ersetzt die Nutzerbewertung nicht.
 
@@ -39,6 +39,7 @@ Die lokale Historie schützt **nicht vor Ausfall desselben Datenträgers**. Proj
 npm test
 /usr/local/bin/python3.12 tests/adapter_test.py
 /usr/local/bin/python3.12 tests/project_store_test.py
+/usr/local/bin/python3.12 tests/host_contract_test.py
 # Vollständige neue Chrome-Prüfung mit eigenem lokalen Testserver/Datenspeicher:
 npm run browser:upgrade
 # Vorhandene Regression: isolierter Testhost, dann in anderem Terminal:

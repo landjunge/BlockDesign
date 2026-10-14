@@ -84,7 +84,7 @@ export function mountAI(store, root, projects = null) {
       title.textContent = task.instruction;
       const status = document.createElement('p');
       status.className = 'task-state';
-      status.textContent = t(lang, task.status);
+      status.textContent = t(lang, task.archived ? 'archivedTask' : task.status);
       const ref = document.createElement('p');
       ref.className = 'np-meta';
       ref.textContent = `${t(lang, 'task')} ${task.task_id.slice(0, 8)} · ${t(lang, 'revision')} ${task.revision}`;
@@ -142,7 +142,7 @@ export function mountAI(store, root, projects = null) {
         card.append(summary);
         for (const proposal of task.reply.proposals)
           card.append(proposalCard(proposal, store, false, projects));
-        if (task.status === 'aiPreview') {
+        if (task.status === 'aiPreview' && !task.archived) {
           const diff = document.createElement('section');
           diff.className = 'ai-preview';
           const values = document.createElement('pre');
