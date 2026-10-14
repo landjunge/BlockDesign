@@ -1,70 +1,45 @@
-# Technische Browserabnahme · Block Designer 0.1.0
+# BlockDesigner 0.2.0 · technische Browser-Abnahme
 
-Geprüfter Produktcode: `df2550390af3cd6c77b79cc5911d7c8c0b9e4d0f` (nach `7101aee` mit korrigierter Zeichenreihenfolge). Spätere Auslieferungscommits enthalten Konzeptabgleich und Abnahmebelege. Releasekennung: `v0.1.0`, Branch `feat/modular-block-designer`, Remote `landjunge/blockdesign`.
+Stand: 14.10.2026. Geprüfter Produktcode **d38415bc5fa77db039a682b2fa45bc8dcc901f25**, Branch `feat/compact-project-history`, vorhandenes Remote `landjunge/blockdesign`. Nachfolgende Konzept-/Belegcommits ändern diesen Produktcode nicht. Die [Abnahme 0.1.0](REPORT-v0.1.0.md) bleibt historisch erhalten.
 
-Umgebung: dieser Mac, Google Chrome 155.0.8059.40, vorhandene ThreadDesk-Playwright-Installation, Python 3.12, statische ES-Module ohne Framework/Buildschritt. Synthetische Dokumente und echte lokale Ollama-Aufrufe mit `llama3.2:3b`. Vorhandener Modulhost `/Users/landjunge/threaddesk-worktrees/ordinal-lock/src` bei `3b6f3fa`; gemeinsamer Designkern unverändert von `b0b6815`.
+**64 Prüfungen bestanden, 0 im endgültigen Prüfstand fehlgeschlagen.** Tatsächlich installierter Google Chrome 155 auf diesem Mac, echte Maus-/Tastaturbedienung mit Playwright. Browserzoom zusätzlich über die nativen Chrome-Einstellungen eines temporären Profils. Technische Abnahme ersetzt die anschließende Nutzerbewertung nicht.
 
-## Ergebnis und Paketzuordnung
+| Prüfung | Bestanden | Fehlgeschlagen |
+|---|---:|---:|
+| Kern / Geometrie / Aktionen / Undo | 19 | 0 |
+| KI-Verträge / Kontext / Antwortprüfung | 12 | 0 |
+| Speichern / Recovery / Deduplizierung | 5 | 0 |
+| Vorhandener Host / Modulrechte / Upgrade | 2 | 0 |
+| Bisherige durchgängige Chrome-Abläufe | 11 | 0 |
+| Neue Chrome-Bedien-/Projekt-/Gesprächsabläufe | 12 | 0 |
+| Echte Chrome-Vergrößerung 125 / 150 / 200 % | 3 | 0 |
 
-13 Kernprüfungen, 8 Adapterprüfungen, 11 durchgängige Chrome-Browserfälle und 3 native Chrome-Zoomstufen bestanden: **35 Prüfungen**. Aktuell fehlgeschlagen: **0 Pflichtfälle**. Alle acht Pakete einschließlich echter KI-Anbindung technisch erfüllt. Die Auslieferung wird mit dem abschließenden Whiteboard-result für `bd-08` / `BD-08.2` und der geprüften Remoteversion belegt. Dies ersetzt die anschließende Nutzerbewertung nicht.
+Die einzelnen Ablauf-IDs und Ergebnisse stehen in [v0.2.0-checks.json](v0.2.0-checks.json). Negative HTTP-Rückgaben sind ausdrücklich Sicherheitsfixtures und zählen nicht als echte KI-Erfolge. Sechs Browserabläufe enthalten tatsächliche Whiteboard-/Ollama-Aufträge; lokale Auswahlfragen sind als Produktrückfragen gekennzeichnet. Speicherfehler wurden durch wirklich verweigerte Schreibrechte im isolierten Testordner verursacht.
 
-| Paket | Status | Beleg |
-| --- | --- | --- |
-| BD-01 · Host/Start/Repository | bestanden | `module.json`, `start.command`, `docs/architecture.md`; echter Start/read-back im Whiteboard |
-| BD-02 · Zustand/Ebenen/Erstellen | bestanden | `BD-02-BROWSER`, Kern: Identität/Versatz/Erschöpfung; sichtbare 1-Pixel-Mitte |
-| BD-03 · Greifen/Bewegen/D/F/Skalieren | bestanden | `BD-03-AXES`, `BD-03-BOUNDS`; D+F ohne Größenänderung, 4 px und proportionale Randbegrenzung |
-| BD-04 · Raster/Monitor/Zoom | bestanden | `BD-04-GRID-MONITOR-ZOOM`, `native-zoom.json`; 20/2→10/1, freie Monitorposition, letzte Werte |
-| BD-05 · T/Typen/Kinder | bestanden | `BD-05-TRANSFER-CHILDREN`; Primary, Textübernahme ohne Identitätsverlust, Gruppierung, Kindbewegung ohne Skalierung; Kinder bleiben in Gestaltung sichtbar |
-| BD-06 · Ansichten/Attributtest | bestanden | `BD-06-ATTR-FOCUS-VIEWS`; A/Farbe/Rad/Übernahme/Escape, gemeinsamer Zustand, Fokus/Modalität |
-| BD-07 · echte KI/Vorschläge/Schutz | bestanden | `BD-07-LIVE-CHANGE`, `BD-07-LIVE-PROPOSALS`, beide ausdrücklich gekennzeichneten negativen Fixturefälle, 8 Adapterprüfungen |
-| BD-08 · Gesamtintegration/Auslieferung | bestanden | gesamter finaler Browserlauf, native Vergrößerung, Codeversion, bestehender Plan und Konzeptsicherung; abschließender Zustell-/Remote-Beleg im Whiteboard |
+## Beobachtetes Ergebnis
 
-[Browserergebnisse](browser-results.json), [Kernprüfungen](core-results.txt), [Adapterprüfungen](adapter-results.txt), [native Browservergrößerung](native-zoom.json), [Whiteboard-Zustellung und Timer](whiteboard-evidence.json).
+- Kompakter eigener Header; 40-Pixel-Bedienhöhe und gemeinsamer Designkern erhalten. Sidebars unabhängig schaltbar und per Rand verstellbar, gesamte freie Breite geht an den Workspace. Palette kompakt, Chateingabe wächst und schrumpft. DE/EN, lange Texte, kleine Fensterausschnitte und Browserzoom bestanden.
+- H zeigt alle tatsächlichen Kürzel aus derselben Definition wie die Eingabe. Texteingaben lösen keine Editoraktionen aus; Escape und Rückfokus funktionieren. Ctrl- und Mac-Cmd-Undo/Redo geprüft.
+- Space bewegt die Mehrfachauswahl mit einem gemeinsamen begrenzten Versatz. Eltern/Kinder werden einmal bewegt. Einzelbedienung, D/F/D+F, Skalierung, Ebenen, T, Gruppierung und beide Ansichten bleiben bedienbar. Monitor ist über Header/Sidebars/Workspace beweglich, seine Position bleibt bei Verkleinerung erreichbar.
+- Raster feiner/gröber ändert Abstand und Fangbereich gemeinsam; Dokumentwerte bleiben bei Zoom unverändert. Im Ausgangsstand funktionierte der erste Feiner-Klick; reproduzierbar fehlerhaft war der siebte Schritt unter die Untergrenze. Unzulässige Folgeschritte sind jetzt deaktiviert.
+- Dokument, MySpace und Gespräch nach Reload erhalten; Projekt nach echtem Serverneustart geöffnet und zwischen Projekten gewechselt. Vor Chat dauerhafter Snapshot, nach Übernahme dauerhafter Ergebnisstand. Ansehen zeigt einen gespeicherten Entwurf. Restore sichert vorher den aktuellen Stand, erhält neuere Stände und startet keine alten Aufträge. Undo/Redo umfasst einen ganzen KI-Batch.
+- Echte Folgeanweisung mit vorherigem Ergebnis/aktueller Auswahl, Auswahlwechsel, echte Modellrückfrage samt Antwort, Vorschau/Verwerfen/Übernehmen und echte Gestaltungsvorschläge mit MySpace bestanden. Ziele, Revision, Ebenen, ungültige/doppelte/veraltete Rückgaben und Verbindungsunterbrechung geprüft. Wirkungsloser Inhalt wird als „keine Änderung“ ausgewiesen.
+- Fehlgeschlagene Vorher-Sicherung verhindert den KI-Versand. Fehlgeschlagene Ergebnissicherung lässt Boxen unverändert. Beschädigte/unterbrochene Commits führen zum letzten lesbaren Stand; Dateien bleiben erhalten. Konkurrierende Tabs überschreiben den neueren Stand nicht.
 
-## Tatsächliche Bedienung und echte KI
+Frühere rote Zwischenläufe bleiben in den lokalen Prüfhistorien: Monitorüberdeckung, falsche Grid-Spalte beim Ausblenden, veraltete Prüf-Fokus-/Warteannahmen sowie Modellverwechslungen zwischen Aktionen/Vorschlägen sowie übernommenen und verworfenen Änderungen. Betroffene Abläufe nach Korrektur wiederholt. Im selben vorhandenen KI-Adapter erfolgen jetzt begrenzte lokale Absichtserkennung und passende Antworterzeugung. Keine simulierten Erfolgsantworten, kein weiterer Orchestrator oder Agent und kein Modellcode.
 
-`BD-07-LIVE-CHANGE` führt in einem Tab Ebenenwahl/Erstellung, Space/Bewegung, D/F/D+F, Skalierung, Rasterverfeinerung, Typ/Beschriftung, Shift/T, fachliche Gruppierung, A-Farbtest und beide Ansichten aus. Anschließend wird ein Kind explizit ausgewählt und tatsächlich über das Whiteboard beauftragt. Die lokal generierte, validierte Aktion beschriftet genau diese Box mit „Weiter“; die Änderung ist in der Gestaltungsansicht und im Attributpanel sichtbar.
+## Start und Wiederherstellung
 
-`BD-07-LIVE-PROPOSALS` fordert zwei unterschiedliche Buttongestaltungen an. Die echte Modellantwort liefert blaue und orange Gestaltungsvorschläge. Ein Vorschlag wird angesehen, in MySpace behalten und daraus auf die aktuelle Auswahl angewendet. Kein simuliertes Ergebnis und kein Stichwort-Befehlsparser.
+`cd /Users/landjunge/blockdesigner` → `./start.command` → `http://127.0.0.1:5190`. Bei belegtem Port beispielsweise `--port 5193`. **H** öffnet die Tastenübersicht. Weitere Start-/Prüfbefehle in [README](../../README.md), Modul-/Datenverträge in [architecture.md](../architecture.md).
 
-Die Belege enthalten task_id, Ausgangsrevision, Box-IDs, tatsächliche Modell-/Token-/Dauermetadaten, Antwortdigest und Whiteboard-task/claimed/progress/result. Der Adapter liest denselben unveränderlichen Task vor Ausführung zurück. Negative JSON-/Netzwerkfixtures prüfen ausschließlich Ablehnung, Veraltung, Idempotenz und Wiederverbindung und zählen nicht als echter KI-Erfolg.
+Projekte ausschließlich lokal unter `~/Library/Application Support/BlockDesigner/`. MySpace → Historie → Ansehen/Wiederherstellen. Unveränderte Inhalte werden über SHA256-Verweise wiederverwendet. Format 1, atomare Commitpublikation mit Dateisynchronisierung, Filelock/Head-Prüfung; frühere Format-1-Varianten bleiben lesbar. Keine automatische Löschung alter Stände. Neue Projektdaten, Auftragsbelege und Screenshots bleiben Git-ignoriert unter `.runtime/`.
 
-[Ergebnis des echten Auftrags](live-ai.json), [sichtbare Änderung](live-ai.png), [echte Vorschläge](live-proposals.json), [MySpace und Anwendung](live-proposals-myspace.png).
+## Grenzen / nicht geprüft
 
-## Ergänzende Prüfungen
+- Lokale Historie schützt nicht vor Ausfall desselben Datenträgers; keine externe Backupsicherheit. Physischer Stromausfall und Hardwaredefekt nicht getestet.
+- Normale Eingaben werden nach 500 ms Ruhe gesichert; der Header zeigt ausstehende Sicherung. Bei abruptem Abbruch können noch ungesicherte Eingaben fehlen. KI-Versand und sichtbare KI-Übernahme benötigen zuvor erfolgreiche dauerhafte Sicherung.
+- Lokales `llama3.2:3b` bleibt sprachlich fehlbar, Antwortzeit variiert. Kleine qualifizierte Einzeländerungen dürfen direkt angewendet werden; größere/mehrteilige Antworten benötigen die Vorschauentscheidung. Kontext und Rückfragen sind keine Garantie jedes freien Sprachverständnisses. KI-Kontext ist begrenzt; zu große Aufträge werden sichtbar abgelehnt, nicht still gekürzt.
+- Keine automatische Kindskalierung, kein Systemmauszeigersprung. Mikrofon, Import/Export, Symbolbibliothek und MCP bleiben spätere Ausbaustufen. Headerbeweglichkeit bleibt eine offene Idee.
+- Andere Browser/Betriebssysteme, native Anwendungen und die anschließende Nutzerbewertung nicht geprüft. Keine externen technischen Blocker im abgenommenen Umfang.
 
-- DE/EN, Referenz 1440×900, Mindestfläche 1180×760, kleiner Ausschnitt 900×600; unveränderte Spaltenkomposition, Aktionen per Scrollen erreichbar, 40-px-Bedienhöhe.
-- Lange Beschriftungen und freier Typ; Text bleibt Text, kein ausgeführter eingebetteter Inhalt.
-- Kürzel lösen in Text-/Select-Fokus und Dialogen keine Boxaktion aus; Dialogfokus hinein/zurück, Escape schließt.
-- Dokumentzoom und native Chrome-Vergrößerung 125/150/200 Prozent: echte Chrome-Einstellung in frischem temporären Profil, gemessene Retina-DPR 2,5/3/4; relative Bewegung liefert unveränderte Dokumentwerte (495,315), 50×50 px bleiben 50×50 px. Alle benötigten Aktionen erreichbar.
-- Falsche Ziele, Identitäts-/Ebenen-/Zuordnungsänderungen, ungültige Farben/Schriften, nichtendliche Werte, Mindestmaß/Ränder, Rastergrenzen, Elternzyklen und große Kontexte werden abgelehnt. Batches bleiben atomar.
-- Doppelte Rückgabe wirkt nicht zweimal; veraltete Antwort bleibt sichtbar zurückgestellt. Verbindungsabbruch zeigt unbekannten Ausgang; „Status abrufen“ holt denselben Auftrag, startet keinen neuen.
-- Modulbewegung begrenzt die ganze Familie; Modulskalierung verändert Kinder nicht. Modul-Hintergrundentscheidungen erhalten Kindidentität/Text/Geometrie. Partielle Schriftpatches erhalten ungenannte Werte.
-- Bestehender Feedback-Watcher tatsächlich gestartet. Zwei kurze 2-Sekunden-Funktionstests erzeugten echte Whiteboard-question-Einträge; der Bau-Timer lief mit 60 Sekunden. Factual operating pings im 40-Sekunden-Abstand wurden zugestellt und zurückgelesen. Eine CPU-intensive alte Poll-Schleife wurde nur im lokalen Wrapper auf 250 ms gedrosselt, die bestehende Quelle blieb erhalten. Keine behauptete automatische Wiederbelebung dieser Chat-Sitzung oder unbewiesene Queue-Zustellung.
-
-## Gefundene und behobene Probleme
-
-Der alte Ein-Datei-Prototyp war syntaktisch defekt und nutzte nur Stichwörter. Er wurde durch getrennte Module und den echten Whiteboard-Adapter ersetzt; im Git-Verlauf bleibt er erhalten.
-
-Ein erster Playwright-Start scheiterte am fehlenden gebundenen Chromium-Paket. Die vorzeitige Whiteboard-Erfolgsmeldung wurde ausdrücklich korrigiert; alle Abnahmen verwenden den tatsächlich installierten Chrome. Zwei Prüfkoordinaten lagen außerhalb des Fensters bzw. des bei 150 Prozent sichtbaren Dokuments; diese Prüffehler wurden berichtigt und die Fälle wiederholt. Native Zoommessung wurde auf die vorhandene Retina-DPR kalibriert.
-
-Erste Modellantworten waren leer, zu langsam, hatten falsche IDs oder eine unvollständige Schriftangabe. Sie wurden nicht angewendet und nicht als Erfolg gezählt. Ein längerer statischer Antwortvertrag und die kleinste 1b-Variante waren für den Gesamtauftrag ungeeignet. Der endgültige Adapter trennt Systeminstruktion/Nutzerdaten, gibt nur relevante Zielattribute/Kindergeometrie an das vorhandene 3b-Modell, reserviert Kontextplatz und unterstützt geprüfte partielle Schriftpatches. Die erfolgreichen finalen Durchläufe belegen das gewählte Produktprofil. Es gibt keinen automatischen Modell-/Anbieter-Fallback und keine globalen Modelländerungen.
-
-Bei der visuellen Nachprüfung einer zunächst grünen Suite verdeckte der Modulhintergrund seine Kinder. `df25503` ordnet Eltern vor Kindern. Eine echte Hit-/Sichtbarkeitsprüfung wurde ergänzt und die betroffenen Abläufe einschließlich des echten KI-Endpunkts wiederholt. Alte Fehlerscreenshots und `browser-history.jsonl` sind historische Diagnosebelege, keine offenen aktuellen Fehler.
-
-## Nicht geprüft und Grenzen
-
-| Gegenstand | Status / Grenze |
-| --- | --- |
-| Nutzerbewertung / gesamte Vision | nicht geprüft; folgt durch den Nutzer |
-| Safari, Firefox, Windows, Linux | nicht geprüft; technische Abnahme dieses Mac mit Chrome |
-| Mikrofon, Webseiten-/Dateiimport, Export/Speichern, Symbolbibliothek, MCP, native Apps | außerhalb des aktuellen Pre-Plans, nicht implementiert und nicht als geprüft ausgegeben |
-| MySpace/Dokument nach Tabende | bewusst keine Persistenz/Exports im Prototyp; nur laufender Tab |
-| Automatische Kinderverteilung/Abstandsvorgaben/Kindskalierung | spätere Verfeinerungen; Kindskalierung ausdrücklich ausgeschlossen |
-| Attributtaste/Palette | A und nummerierte Palette v1 sind dokumentierte vorläufige Testentscheidungen |
-| Lokale KI | benötigt den vorhandenen ThreadDesk-Checkout, Ollama und installiertes 3b-Modell; unterstützt deklarative Box-/Rasteraktionen und Styles, keine beliebige Werkzeugausführung |
-| Modellqualität | validierte Syntax/Rechte/Werte garantieren nicht die inhaltliche Absicht jeder freien Formulierung; fehlerhafte Antworten werden sichtbar zurückgestellt/abgelehnt, keine Visionserfüllung behauptet |
-| Umfang/Timeout | konservativer Kontext-/Metadatenrahmen, höchstens ein Auftrag, begrenzte Ausgabe und 180-s-Aufruf; Timeout beweist keinen sofortigen internen Inferenzstopp. Kein blindes Retry. |
-| Systemmauszeiger | Browser versetzt ihn nicht; virtueller Greifer und relative Bewegung geprüft |
-
-Startweg und Tastenübersicht stehen in der [README](../../README.md), die implementierten Schnittstellen im [Modulvertrag](../architecture.md). Die maßgeblichen Konzepte bleiben ausschließlich im bestehenden ThreadDesk-Ordner gepflegt; `docs/concept` erhält nur den automatischen Abgleich.
+Rückmeldebelege liegen im bestehenden Whiteboard und lokal. Die erste Timer-Auslöseprobe erzeugte tatsächliche Nachfragen. Ein Teilergebnis hatte den ersten Gesamttimer vorzeitig beendet; anschließend Schrittkennungen getrennt und den vorhandenen 60-Sekunden-Watcher neu gestartet. Keine durchgehende ursprüngliche Timerlaufzeit oder automatische Wiederbelebung dieser Sitzung behauptet.

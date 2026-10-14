@@ -1,0 +1,166 @@
+{
+  "version": "0.2.0",
+  "tested_product_commit": "d38415bc5fa77db039a682b2fa45bc8dcc901f25",
+  "date": "2026-10-14",
+  "browser": "Google Chrome 155.0.8059.40 on this Mac",
+  "unit": [
+    {
+      "suite": "core",
+      "passed": 19
+    },
+    {
+      "suite": "adapter",
+      "passed": 12
+    },
+    {
+      "suite": "project_store",
+      "passed": 5
+    },
+    {
+      "suite": "host_contract",
+      "passed": 2
+    }
+  ],
+  "existing_browser": [
+    {
+      "id": "BD-02-BROWSER",
+      "status": "bestanden",
+      "seconds": 0.72
+    },
+    {
+      "id": "BD-03-AXES",
+      "status": "bestanden",
+      "seconds": 0.96
+    },
+    {
+      "id": "BD-03-BOUNDS",
+      "status": "bestanden",
+      "seconds": 2.45
+    },
+    {
+      "id": "BD-04-GRID-MONITOR-ZOOM",
+      "status": "bestanden",
+      "seconds": 1.16
+    },
+    {
+      "id": "BD-05-TRANSFER-CHILDREN",
+      "status": "bestanden",
+      "seconds": 1.32
+    },
+    {
+      "id": "BD-06-ATTR-FOCUS-VIEWS",
+      "status": "bestanden",
+      "seconds": 1.34
+    },
+    {
+      "id": "BD-08-DE-EN-DESKTOP",
+      "status": "bestanden",
+      "seconds": 1.89
+    },
+    {
+      "id": "BD-07-INVALID-FIXTURE",
+      "status": "bestanden",
+      "seconds": 1.07
+    },
+    {
+      "id": "BD-07-STALE-DUPLICATE-DISCONNECT-FIXTURE",
+      "status": "bestanden",
+      "seconds": 1.27
+    },
+    {
+      "id": "BD-07-LIVE-CHANGE",
+      "status": "bestanden",
+      "seconds": 47.42
+    },
+    {
+      "id": "BD-07-LIVE-PROPOSALS",
+      "status": "bestanden",
+      "seconds": 64.23
+    }
+  ],
+  "upgrade_browser": [
+    {
+      "id": "BU-HELP-FOCUS",
+      "status": "bestanden",
+      "seconds": 1.68
+    },
+    {
+      "id": "BU-MULTI-FAMILY-BOUNDS",
+      "status": "bestanden",
+      "seconds": 1.85
+    },
+    {
+      "id": "BU-SIDEBARS-MONITOR-GRID",
+      "status": "bestanden",
+      "seconds": 3.74
+    },
+    {
+      "id": "BU-PALETTE-CHAT-DE-EN",
+      "status": "bestanden",
+      "seconds": 2.01
+    },
+    {
+      "id": "BU-DURABLE-RESTART-RESTORE",
+      "status": "bestanden",
+      "seconds": 4.3
+    },
+    {
+      "id": "BU-CORRUPTION-RECOVERY",
+      "status": "bestanden",
+      "seconds": 2.2
+    },
+    {
+      "id": "BU-REAL-CONVERSATION-PREVIEW-UNDO",
+      "status": "bestanden",
+      "seconds": 174.96
+    },
+    {
+      "id": "BU-REAL-QUESTION-SELECTION",
+      "status": "bestanden",
+      "seconds": 76.94
+    },
+    {
+      "id": "BU-DISK-FAILURE",
+      "status": "bestanden",
+      "seconds": 45.61
+    },
+    {
+      "id": "BU-REAL-MODEL-CLARIFICATION",
+      "status": "bestanden",
+      "seconds": 71.04
+    },
+    {
+      "id": "BU-COMPETING-TABS",
+      "status": "bestanden",
+      "seconds": 3.67
+    },
+    {
+      "id": "BU-NOOP-REPLY-FIXTURE",
+      "status": "bestanden",
+      "seconds": 1.49
+    }
+  ],
+  "native_browser_zoom": [
+    {
+      "zoom": 1.25,
+      "status": "bestanden"
+    },
+    {
+      "zoom": 1.5,
+      "status": "bestanden"
+    },
+    {
+      "zoom": 2.0,
+      "status": "bestanden"
+    }
+  ],
+  "total_passed": 64,
+  "failed_final": 0,
+  "not_checked": [
+    "Other browsers and operating systems",
+    "Physical power-loss fault injection",
+    "External disk backup recovery",
+    "Subsequent user assessment"
+  ],
+  "artifacts": "Private, Git-ignored .runtime/acceptance-v02 and .runtime/upgrade-acceptance"
+}
