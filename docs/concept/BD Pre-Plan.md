@@ -5,7 +5,7 @@ Startbares Browser-Prototyp-Modul mit Boxbedienung, zwei Ansichten, Attributmodu
 Quellen im selben Ordner: BD Brainstorm Destillat.md; BD Ziel Idee.md.
 Projektworkspace: /Users/landjunge/blockdesigner. GitHub-Ziel laut Nutzer: blockdesigner ohne Bindestrich; tatsächliches Remote vor Schreiben prüfen. Keine anderen Repositories löschen.
 Regeln: /Users/landjunge/threaddesk-worktrees/closed-chat-import/docs/usability/GOLDENRULES.MD (§§15–19 einschließlich späterer Desktop-Präzisierung); /Users/landjunge/.threaddesk/Workflow/Workflow-Planerstellung-fuer-andere-KIs.md. Regelstand vor Umsetzung abgleichen.
-Speichern/Export, Webseitenimport, Symbolbibliothek, MCP und Mikrofon sind spätere Ausbaustufen. Die vollständige Vision bleibt in den Quellen erhalten.
+Lokales Speichern/Snapshots sind seit dem unten präzisierten Umbau 0.2 Pflicht. Export, Webseitenimport, Symbolbibliothek, MCP und Mikrofon bleiben spätere Ausbaustufen. Die vollständige Vision bleibt in den Quellen erhalten.
 
 ## Gemeinsamer Bauvertrag
 Vorhandene Module, Schnittstellen und Tests nutzen. Keine zusätzlichen ThreadDesk-Kernrechte, kein zweiter Orchestrator und keine direkten Zugriffe auf fremde Datenbanken.
@@ -81,10 +81,10 @@ Jedes BD-Paket bei Vergabe in kleine prüfbare Teilaufgaben mit eigener step_id 
 Abhängigkeiten: 01 → 02; danach 03/04/05 auf abgestimmten Schnittstellen, 06 nach 05, 07 nach 01/02; 08 nach allen. Parallel nur mit klar getrennten Dateien beziehungsweise isolierten Arbeitsständen.
 Acht gleich gewichtete Pakete; Teilgewichte summieren sich je Paket zu dessen Gewicht. 100 Prozent erst nach BD-08. Günstigste geeignete zugelassene KI und vorhandene deterministische Wege nutzen.
 
-## Übergabestatus
+## Übergabestatus der Umsetzung 0.1
 Am 14.10.2026 direkt durch den Nutzer an die aktive Codex-Session `01a13ae2-819a-7442-8789-a7e7c4f1cc94` zugestellt. Übernahme und erste echte Arbeit im Whiteboard-Thread `2e1032dcf420` bestätigt. Kein rekursiver Sessionstart. Gesamtauftrag `bd-build-20261014`, Paketaufträge `bd-01` bis `bd-08`; Fortschritt ausschließlich nach belegten Abschlusskriterien.
 
-## Konkretisierte Architektur und Baufolge · 14.10.2026
+## Konkretisierte Architektur und Baufolge · 0.1-Historie · 14.10.2026
 Diese Ergänzung präzisiert die oben erhaltenen Verträge. Bestehende Historie und Bedienentscheidungen bleiben verbindlich.
 
 ### Geprüfter Anschluss und Repository
@@ -137,7 +137,7 @@ Die allgemeine Workflow-Anweisung zur gegenseitigen neuen Codex/Grok-Session gil
 
 
 
-## Technischer Abschlussstand · 14.10.2026
+## Technischer Abschlussstand 0.1 · 14.10.2026
 Implementiert im vorgesehenen Workspace, vorhandenes Remote `landjunge/blockdesign`, Branch `feat/modular-block-designer`, Produktversion 0.1.0. Geprüfter Produktcode `df2550390af3cd6c77b79cc5911d7c8c0b9e4d0f`; spätere Beleg-/Konzeptcommits ändern diesen geprüften Produktcode nicht. Start: `cd /Users/landjunge/blockdesigner && ./start.command`, Browser `http://127.0.0.1:5190`.
 
 | Paket | Ergebnis / konkrete Abnahme |
@@ -259,3 +259,5 @@ Brainstorming ist keine automatische Ausführungserlaubnis. Theoretische Beispie
 Gemeinsame Wissens-/Entscheidungszuordnung mit den vorhandenen ThreadDesk-Strukturen und gültigen produktübergreifenden Beschlüssen abgleichen. Danach erst konkrete Integrationsaufträge je betroffenem Tool ableiten. Export und Beispielplayer bleiben getrennte zukünftige Themen. Kein neuer Integrationsprozess wurde mit diesem Sicherungsschritt gestartet.
 
 - Ergänzung aus der letzten Stilregression: Die vorhandene lokale KI unterscheidet in einem kurzen begrenzten ersten Modellaufruf edit/proposal/question; ein anschließender Aufruf im selben bestehenden Whiteboard-Job erhält die passende exklusive Antwortform. Vorschlagsaufträge können dadurch keine zusätzlichen Aktionslisten ausliefern. Beide Schritte benutzen denselben vorhandenen lokalen Transport, dieselben Task-/Snapshotbezüge und unabhängigen Validatoren; kein zweiter Orchestrator oder Agent. Echte Rollen und eindeutige Antwortformen verbesserten die geprüften Abläufe. Frühere Modellverwechslungen bleiben als fehlgeschlagene Zwischenläufe dokumentiert und zählen nicht als Abnahme.
+
+- Gesprächskontext nach der erneuten Abnahmepräzisierung: Die bestehende kurze Absichtserkennung entscheidet zusätzlich, ob ein Rückbezug nötig ist. Eigenständige Aufträge gehen mit aktuellen Ziel-/Dokumentdaten an die Erzeugung, Folgeaufträge erhalten die relevanten früheren Aufträge/Ergebnisse einschließlich Vorschlägen. Der vollständige Verlauf bleibt im Projekt und im gebundenen Auftrag. Verworfen/fehlgeschlagen/veraltet wird nicht als ausgeführte Aktion präsentiert. Bei wortgleichem erneutem Auftrag bleibt der frühere Status als Hinweis; alte Aktionslisten werden nicht erneut als Vorlage ausgegeben. Rückgaben ohne tatsächliche Inhaltsänderung heißen sichtbar „keine Änderung“, ohne vorgetäuschte Übernahme.
