@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "model": "llama3.2:3b",
+  "reason": "Kleinste vorhandene Variante mit nachgewiesenen echten Gestaltungsvorschlägen. 1b bestand eine Aktion, scheiterte aber an Vorschlägen; 7b brachte keine Verbesserung. Kompakter relevanter Kontext, keine globalen Einstellungen oder externen Kosten."
+}

@@ -1,0 +1,1 @@
+{"name":"blockdesigner","version":"0.1.0","private":true,"type":"module","scripts":{"start":"./start.command","test":"node --test tests/core.test.js","browser":"/Users/landjunge/threaddesk/.venv/bin/python tests/browser_acceptance.py"}}
