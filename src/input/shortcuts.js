@@ -92,7 +92,7 @@ export const SHORTCUTS = Object.freeze([
     keys: ['y', 'z'],
     modifier: true,
     shift: true,
-    key: '⌘ / Ctrl + Shift + Z · Ctrl + Y',
+    key: '⌘ / Ctrl + Shift + Z · ⌘ / Ctrl + Y',
     de: 'Änderung wiederholen',
     en: 'Redo change',
   },

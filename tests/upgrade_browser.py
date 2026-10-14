@@ -70,7 +70,7 @@ def multi_group_bounds(p):
  # each move once even though the parent family already includes this child.
  p.mouse.click(*point(p,parent['x']+parent['width']/2,parent['y']+parent['height']/2));p.keyboard.down('Shift');p.mouse.click(*point(p,child['x']+25,child['y']+25));p.keyboard.up('Shift');assert state(p)['selection']==[parent['id'],child['id']]
  before=state(p)['boxes'];p.keyboard.press('Space');p.mouse.move(*point(p,-100,-100));p.keyboard.press('Space');after=state(p)['boxes'];dx=after[0]['x']-before[0]['x'];dy=after[0]['y']-before[0]['y'];assert all(b['x']-a['x']==dx and b['y']-a['y']==dy for a,b in zip(before,after));assert min(b['x'] for b in after)==0;assert min(b['y'] for b in after)==0
- focus(p);p.keyboard.press('Control+z');assert state(p)['boxes']==before;p.keyboard.press('Control+Shift+z');assert state(p)['boxes']==after
+ focus(p);p.keyboard.press('Control+z');assert state(p)['boxes']==before;p.keyboard.press('Control+Shift+z');assert state(p)['boxes']==after;p.keyboard.press('Meta+z');assert state(p)['boxes']==before;p.keyboard.press('Meta+Shift+z');assert state(p)['boxes']==after
 
 def layout_monitor_grid(p):
  widths=[]

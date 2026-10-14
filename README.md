@@ -21,7 +21,7 @@ H öffnet die vollständige Hilfe aus derselben Shortcut-Definition wie die Eing
 | Klick / Shift-Klick / Enter | Auswahl / geordnet ergänzen oder entfernen / fokussierte Box auswählen |
 | T | Passende Eigenschaften einschließlich Text von Primary übernehmen |
 | A halten | Farbe wählen, Rad: Helligkeit; Loslassen übernimmt, Escape bricht ab |
-| ⌘/Ctrl+Z · ⌘/Ctrl+Shift+Z / Ctrl+Y | Rückgängig / Wiederholen |
+| ⌘/Ctrl+Z · ⌘/Ctrl+Shift+Z / ⌘/Ctrl+Y | Rückgängig / Wiederholen |
 | H / Escape | Hilfe öffnen / schließen oder Attributgeste abbrechen |
 | Monitor-Kopf ziehen / Pfeile | Monitor über der gesamten App verschieben |
 
