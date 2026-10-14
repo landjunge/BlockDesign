@@ -257,3 +257,5 @@ Brainstorming ist keine automatische Ausführungserlaubnis. Theoretische Beispie
 
 ### Nächster offener Schritt
 Gemeinsame Wissens-/Entscheidungszuordnung mit den vorhandenen ThreadDesk-Strukturen und gültigen produktübergreifenden Beschlüssen abgleichen. Danach erst konkrete Integrationsaufträge je betroffenem Tool ableiten. Export und Beispielplayer bleiben getrennte zukünftige Themen. Kein neuer Integrationsprozess wurde mit diesem Sicherungsschritt gestartet.
+
+- Ergänzung aus der letzten Stilregression: Die vorhandene lokale KI unterscheidet in einem kurzen begrenzten ersten Modellaufruf edit/proposal/question; ein anschließender Aufruf im selben bestehenden Whiteboard-Job erhält die passende exklusive Antwortform. Vorschlagsaufträge können dadurch keine zusätzlichen Aktionslisten ausliefern. Beide Schritte benutzen denselben vorhandenen lokalen Transport, dieselben Task-/Snapshotbezüge und unabhängigen Validatoren; kein zweiter Orchestrator oder Agent. Echte Rollen und eindeutige Antwortformen verbesserten die geprüften Abläufe. Frühere Modellverwechslungen bleiben als fehlgeschlagene Zwischenläufe dokumentiert und zählen nicht als Abnahme.
