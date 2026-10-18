@@ -10,10 +10,11 @@ import stat
 from pathlib import Path
 from uuid import UUID
 
+PROJECT = Path(__file__).resolve().parents[1]
 MAX_PROFILE_BYTES = 65536
 MAX_PROJECTS = 32
 MESSAGES = {
-    "workflow_profile_file": "Private absolute regular file required (owner-only, no symlinks) / private absolute Datei erforderlich (nur Eigentümer, keine Symlinks).",
+    "workflow_profile_file": "Private absolute regular file outside the entire editor project required (owner-only, no symlinks) / private absolute Datei außerhalb des gesamten Editorprojekts erforderlich (nur Eigentümer, keine Symlinks).",
     "workflow_profile_schema": "Invalid bounded workflow profile / ungültiges begrenztes Workflowprofil.",
     "workflow_profile_sdk": "Existing compatible KiraBridge SDK is missing; select an existing BD_PYTHON environment, no automatic installation / kompatibles vorhandenes KiraBridge-SDK fehlt; vorhandene BD_PYTHON-Umgebung wählen.",
     "workflow_profile_bridge": "Existing Bridge config/principal/credentials unavailable or incompatible; inspect locally without exposing secrets / bestehende Bridge-Konfiguration, Principal oder Zugang nicht nutzbar; lokal ohne Geheimnisausgabe prüfen.",
@@ -33,12 +34,34 @@ def selected_profile(option=None):
     )
 
 
+def external_private_file(value, *, private=True):
+    """Check configured private files before their SDK reader can use them."""
+    try:
+        path = Path(value)
+        if (
+            not path.is_absolute()
+            or path != path.resolve(strict=True)
+            or path.is_relative_to(PROJECT.resolve())
+        ):
+            raise ValueError
+        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        with os.fdopen(fd, "rb") as stream:
+            info = os.fstat(stream.fileno())
+            if (
+                not stat.S_ISREG(info.st_mode)
+                or private
+                and (info.st_uid != os.getuid() or info.st_mode & 0o077)
+            ):
+                raise ValueError
+        return path
+    except (OSError, ValueError, TypeError, RuntimeError):
+        raise WorkflowProfileError("workflow_profile_file") from None
+
+
 def private_bytes(value):
     """Read once, bounded and descriptor-checked; never chmod/create a user file."""
     try:
-        path = Path(value)
-        if not path.is_absolute() or path != path.resolve(strict=True):
-            raise ValueError
+        path = external_private_file(value)
         fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
         with os.fdopen(fd, "rb") as source:
             before = os.fstat(source.fileno())
@@ -71,7 +94,7 @@ def private_bytes(value):
             ):
                 raise ValueError
             return raw
-    except (OSError, ValueError, TypeError):
+    except (OSError, ValueError, TypeError, RuntimeError):
         raise WorkflowProfileError("workflow_profile_file") from None
 
 
@@ -148,7 +171,13 @@ def load_workflow_profile(option=None):
             or value["principal"] not in config.principals
         ):
             raise ValueError
+        for field in ("credentials_file", "tls_key", "tls_cert"):
+            configured = getattr(config, field, None)
+            if configured is not None:
+                external_private_file(configured, private=field != "tls_cert")
         client = FixedBridgeClient(config, value["principal"])
+    except WorkflowProfileError:
+        raise
     except ImportError:
         raise WorkflowProfileError("workflow_profile_sdk") from None
     except Exception:

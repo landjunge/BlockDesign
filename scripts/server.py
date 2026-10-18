@@ -13,6 +13,7 @@ from host import Host, PROJECT
 from ai_adapter import AIAdapter, ContractError
 from design_workflow import DesignWorkflow
 from workflow_profile import load_workflow_profile, WorkflowProfileError
+from static_assets import read_asset, AssetUnavailable
 
 class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -60,12 +61,19 @@ class Handler(SimpleHTTPRequestHandler):
             try: self.reply(self.server.adapter.get(path.removeprefix('/api/tasks/')))
             except ContractError as e:self.reply({'error':str(e)},404)
             return
-        target=(PROJECT/path.lstrip('/')).resolve()
-        if path=='/':target=PROJECT/'index.html'
-        if not target.is_relative_to(PROJECT) or not (target==PROJECT/'index.html' or
-          target.is_relative_to(PROJECT/'src') or target.is_relative_to(PROJECT/'styles')):
-            self.send_error(404);return
-        super().do_GET()
+        self.static_response(path)
+    def do_HEAD(self):
+        if not self.local_request():return
+        self.static_response(unquote(urlparse(self.path).path), head_only=True)
+    def static_response(self, path, head_only=False):
+        try:raw, modified=read_asset(PROJECT,path)
+        except AssetUnavailable:self.send_error(404);return
+        self.send_response(200)
+        self.send_header('Content-Type',self.guess_type('index.html' if path=='/' else path))
+        self.send_header('Content-Length',str(len(raw)))
+        self.send_header('Last-Modified',self.date_time_string(modified))
+        self.end_headers()
+        if not head_only:self.wfile.write(raw)
     def local_request(self):
         allowed={f'127.0.0.1:{self.server.server_port}',f'localhost:{self.server.server_port}'}
         if self.headers.get('Host') not in allowed:
