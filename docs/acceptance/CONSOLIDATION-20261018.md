@@ -74,11 +74,17 @@ freier Portnummer. Keine Userprojekte oder fremden Prozesse verändert. Belegt:
   bleibt mit derselben Editor-Komposition und schaltbaren Sidebars erreichbar.
 - Private `.runtime`-Datei wird404 abgelehnt, fremde POST-Origin403.
 
-14 benannte Assertionsgruppen in `.runtime/consolidation-20261018/checks.json`,
-Screenshots `desktop-de.png`, `desktop-en.png`, `small-window.png` dort. Sie wurden
+14 benannte Assertionsgruppen in `.runtime/consolidation-20261018/<run>/checks.json`,
+Screenshots `desktop-de.png`, `desktop-en.png`, `small-window.png` im selben Laufordner. Sie wurden
 visuell angesehen; Monitor, Hauptarbeitsfläche und gebogene Headeraktionen klar,
 fehlende KI-Verbindung tatsächlich als Text ausgewiesen. Neue Belege bleiben wie
 bisher lokal ignoriert. Aktuell keine neue Modellinferenz; `ai_requests_sent=0`.
+Die erste Versionierung der Probe hatte einen Harnessfehler: ein String-Prädikat
+in Playwright verlangte unter der bestehenden CSP verbotenes unsafe-eval. Nur
+das Prüfprädikat wurde zur Funktion geändert, CSP unverändert. Der fehlgeschlagene
+Lauf ist separat dokumentiert; Folgeproben erhalten eindeutige Laufordner und
+speichern Fehlerstatus, statt frühere Belege zu überschreiben. Die korrigierte
+versionierte Probe wurde erneut tatsächlich ausgeführt.
 Diese Probe wiederholt nicht die historische vollständige64-Prüfungen-Abnahme.
 
 ## Lieferstand und Grenzen

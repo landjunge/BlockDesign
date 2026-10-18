@@ -188,7 +188,26 @@
                       "unresolved"
                     ]
                   }
-                }
+                },
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "resolution": {
+                          "const": "unique"
+                        }
+                      }
+                    },
+                    "then": {
+                      "properties": {
+                        "element_id": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      }
+                    }
+                  }
+                ]
               },
               {
                 "type": "null"
@@ -266,7 +285,26 @@
                         "unresolved"
                       ]
                     }
-                  }
+                  },
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "resolution": {
+                            "const": "unique"
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "element_id": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
