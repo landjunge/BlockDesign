@@ -298,3 +298,35 @@ def test_invalid_profile_stops_actual_server_before_port_host_or_store(
     diagnostic = capsys.readouterr().err
     assert "workflow_profile_file" in diagnostic
     assert str(own[2]) not in diagnostic
+
+
+@pytest.mark.parametrize("case", ["retired_unrelated_root", "symlink_cwd", "state_cwd"])
+def test_existing_descriptor_scope_checks_only_selected_project_and_excludes_state(
+    own, case
+):
+    config = Path(own[3]["bridge_config"])
+    source = own[0] / "source"
+    if case == "retired_unrelated_root":
+        content = config.read_text().replace(
+            f"roots = [{json.dumps(str(source))}]",
+            f"roots = [{json.dumps(str(own[0] / 'retired-worktree'))}, {json.dumps(str(source))}]",
+        )
+        config.write_text(content)
+        client, mapping = profiles.load_workflow_profile(save(own))
+        assert client.principal == "operator" and own[1] in mapping
+        assert not (own[0] / "retired-worktree").exists()
+        return
+    if case == "symlink_cwd":
+        alias = own[0] / "alias"
+        alias.symlink_to(source, target_is_directory=True)
+        own[3]["projects"][own[1]]["cwd"] = str(alias)
+    else:
+        content = config.read_text().replace(
+            f"data_dir = {json.dumps(str(own[0] / 'never-created-state'))}",
+            f"data_dir = {json.dumps(str(source))}",
+        )
+        assert content != config.read_text()
+        config.write_text(content)
+    with pytest.raises(profiles.WorkflowProfileError) as error:
+        profiles.load_workflow_profile(save(own))
+    assert error.value.code == "workflow_profile_project"

@@ -21,7 +21,10 @@ Voraussetzungen:
   `/api/projects`-Abruf des eigenen lokalen Editors. Die Beispiel-UUID ersetzen;
   eine UUID ist kein Identitäts-/Rechtebeleg.
 - Kanonischer absoluter Quellordner innerhalb der **vorhandenen** Principal-Roots.
-  `source_file` und `preview_file` sind verschiedene feste einzelne Dateinamen,
+  Der bestehende descriptorbasierte Bridge-PathScope prüft nur das konkrete CWD,
+  schließt Bridge-State aus und verlangt nicht, dass andere registrierte Worktrees
+  noch existieren. `source_file` und `preview_file` sind verschiedene feste
+  einzelne Dateinamen,
   keine Pfade. HTML-Quelle und importierter Entwurf müssen im vorhandenen
   Workflow exakt passen. Die Rückvorschau darf erst nach dem Agentenlauf entstehen.
 
@@ -45,8 +48,8 @@ Beispiel ohne Geheimnisse; nur als Vorlage, nicht als aktive Nutzerkonfiguration
 In einer **neuen eigenen** privaten Datei außerhalb des Repos speichern; vorhandene
 Profile nicht überschreiben. JSON-Profil und referenzierte Bridge-Konfiguration
 müssen dem eigenen OS-Konto gehören, regulär, nur für den Eigentümer zugänglich
-(z.B.0600) und über absolute kanonische Pfade ohne Symlinks erreichbar sein.
-Der Start prüft und verändert keine Dateirechte. Höchstens64KiB pro Datei,
+(z. B. `0600`) und über absolute kanonische Pfade ohne Symlinks erreichbar sein.
+Der Start prüft und verändert keine Dateirechte. Höchstens 64 KiB pro Datei,
 1–32 Projekte; unbekannte/doppelte Felder und unzulässige Namen werden abgewiesen.
 Das JSON ist kein Browser-/HTTP-Eingabeformat.
 
@@ -108,10 +111,12 @@ Replace the example UUID with your own existing BD project ID from the editor's
 existing `/api/projects` response. UUIDs do not prove identity or authority.
 
 Save a **new owned** private profile outside the repository. Both profile and Bridge
-config must be owner-only regular files (e.g.0600), with absolute canonical paths
-and no symlinks. No automatic chmod. Maximum64KiB per file,1–32 projects; unknown/
+config must be owner-only regular files (e.g. `0600`), with absolute canonical paths
+and no symlinks. No automatic chmod. Maximum 64 KiB per file, 1–32 projects; unknown/
 duplicate fields fail closed. Map each project to an existing canonical source CWD
-inside the principal's existing roots and two distinct simple filenames. This is
+inside the principal's existing roots and two distinct simple filenames. The existing
+Bridge descriptor boundary checks the selected CWD and excludes state; an unrelated
+removed policy root does not prevent this valid project loading. This is
 not a browser configuration API. Source HTML must match the actual imported design;
 the returned preview can be created later by the explicitly started workflow.
 
@@ -142,25 +147,32 @@ historical; no model, installed-user-runtime or new ChatGPT acceptance follows h
 ## Begrenzte Quellabnahme / Bounded source acceptance · 19.10.2026
 
 [Quell-/Prüfquittung](acceptance/WORKFLOW-PROFILE-20261019.json): Basis
-`eb3df8d1c556a8355ff28667d061e3e02d1a8670`,26 neue fokussierte Tests bestanden
-unter eigener isolierter Python3.12.13-Umgebung im Worktree. Keine bestehende
+`eb3df8d1c556a8355ff28667d061e3e02d1a8670`, 29 verschiedene neue fokussierte Tests
+unter eigener isolierter Python 3.12.13-Umgebung im Worktree bestanden: zuerst 26,
+nach begrenzter Source-Review sechs direkt betroffene Fälle (drei neu, drei
+gezielt erneut wegen geänderter CWD-Boundary). Keine bestehende
 Funktions-/Browser-/Modellsuite wiederholt. SDK-Quelle
 `f19797b2e1b7e34b73de1180734a6b9c93ab07e5` (Verhaltensbasis `7af39cd`),
 ThreadDesk-Quelle `05403916e549e1060f839ccbaf36a5cb90413776`.
-Die29 SDK-Abhängigkeiten wurden aus dem vorhandenen KB-`uv.lock` mit Hashprüfung
-übernommen, darunter MCP1.30.0 und auf diesem Intel-Mac cryptography48.0.1;
+Die 29 SDK-Abhängigkeiten wurden aus dem vorhandenen KB-`uv.lock` mit Hashprüfung
+übernommen, darunter MCP 1.30.0 und auf diesem Intel-Mac cryptography 48.0.1;
 nur fünf gepinnte pytest-Testabhängigkeiten zusätzlich. Fremde Umgebungen unverändert.
 
 Der tatsächliche Shellweg `start.command --check` meldete Python-/Modulvertrag und
 privates Profil bereit, jedoch erwartungsgemäß Exit2/`binding_ready=false`: Die
 synthetische Hostbindung wurde **nicht** angelegt. Kein Port, Setup, Task oder
-Datenbank entstand. Ein weiterer echter Shellcheck wies ein0644-Testprofil mit
+Datenbank entstand. Ein weiterer echter Shellcheck wies ein `0644`-Testprofil mit
 `workflow_profile_file` ohne Pfad-/Tokenausgabe ab. Normale Server-Parser/Host-
 Verdrahtung wurde mit injiziertem nicht lauschendem Server/Host/Store geprüft,
-mit und ohne Profil; keine produktive Aktivierung. Die referenzierten JSON-Belege
+mit und ohne Profil; keine produktive Aktivierung. Ein weiterer tatsächlicher
+Shellcheck bestätigte den gültigen Ziel-CWD trotz anderer gelöschter Policy-Root.
+Symlink-/fehlender CWD und Bridge-State bleiben gesperrt. Die referenzierten
+JSON-Belege
 halten lokale Voraussetzungen getrennt von weiterhin ungeprüftem Dispatch.
 
-The receipt records26 focused tests in an isolated Python3.12 environment and the
+The receipt records 29 distinct focused tests (26 first, then six impacted cases
+including three new boundary countercases) in an isolated Python 3.12 environment
+and the
 actual shell preflight, including rejection of a shared-readable synthetic profile.
 It does not claim user installation, a live server/model/ChatGPT call or project
 acceptance. Existing user's profiles, services, queues and historical evidence were

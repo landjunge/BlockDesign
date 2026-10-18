@@ -137,6 +137,7 @@ def load_workflow_profile(option=None):
     try:
         from design_workflow import DesignWorkflow, FixedBridgeClient
         from kirabridge.bridge_core.config import load_config
+        from kirabridge.filesystem_manager import PathScope
     except ImportError:
         raise WorkflowProfileError("workflow_profile_sdk") from None
     try:
@@ -155,14 +156,19 @@ def load_workflow_profile(option=None):
         raise WorkflowProfileError("workflow_profile_bridge") from None
     workflow = DesignWorkflow(None, client, profiles)
     try:
-        roots = [
-            Path(root).resolve(strict=True)
-            for root in config.principals[value["principal"]].roots
-        ]
+        scope = PathScope(
+            config.principals[value["principal"]].roots,
+            excluded=[str(config.state_path)],
+        )
         for project in profiles:
             pinned = workflow.operator_profile(project)
-            if not any(Path(pinned["cwd"]).is_relative_to(root) for root in roots):
-                raise ValueError
+            with scope.directory(pinned["cwd"]) as directory:
+                info = os.fstat(directory)
+                if (info.st_dev, info.st_ino) != (
+                    pinned["cwd_device"],
+                    pinned["cwd_inode"],
+                ):
+                    raise ValueError
     except Exception:
         raise WorkflowProfileError("workflow_profile_project") from None
     return client, profiles

@@ -8,8 +8,19 @@
   "mcp": "1.30.0",
   "cryptography": "48.0.1",
   "new_tests": {
-    "passed": 26,
-    "seconds": 1.52,
+    "unique_passed": 29,
+    "runs": [
+      {
+        "passed": 26,
+        "seconds": 1.52,
+        "scope": "new profile/parser paths before root-boundary review"
+      },
+      {
+        "passed": 6,
+        "seconds": 1.37,
+        "scope": "3 new +3 impacted source-boundary cases after review"
+      }
+    ],
     "only": "tests/workflow_profile_test.py"
   },
   "actual_start_check": {
@@ -31,10 +42,26 @@
   "host_wiring": "actual main/parser with injected non-listening server+Host/Store; configured and default cases",
   "writes_by_checker": false,
   "shared_environment_changed": false,
-  "source_sha256": {
+  "initial_source_sha256": {
     "scripts/launch.py": "4a6450afe58090a1e49fb2e3447e45aaaeea2173c4457d869c1041987adadbfa",
     "scripts/server.py": "8095a3d3bff3f2d03e7a5814974f9165bd0a211f6bf26832bd63522a6c96dc63",
     "scripts/workflow_profile.py": "bee6e155e9dfa5e04c3f625337e9754c9b15874949a561c99312c9a9929d624c",
     "tests/workflow_profile_test.py": "f29ba75ec554f1b7dc1d9d82a4d2d1d850a6c9000a16fcb8570b40dfbe807b01"
+  },
+  "source_sha256": {
+    "scripts/launch.py": "4a6450afe58090a1e49fb2e3447e45aaaeea2173c4457d869c1041987adadbfa",
+    "scripts/server.py": "8095a3d3bff3f2d03e7a5814974f9165bd0a211f6bf26832bd63522a6c96dc63",
+    "scripts/workflow_profile.py": "698bbcbb8d2181e86caf5e285875328cb1c18b514f4d51a7ae973f4b0d7c36f0",
+    "tests/workflow_profile_test.py": "495b0eb379f3995deeebb41ee54b668f6fad6ad123704a1205fd952fdaa06870"
+  },
+  "actual_start_retired_root_after_review": {
+    "exit": 2,
+    "prerequisites_ready": true,
+    "workflow_profile_configured": true,
+    "binding_ready": false,
+    "reason": "synthetic host binding intentionally absent",
+    "retired_unrelated_root_ignored": true,
+    "network_checked": false,
+    "dispatch_verified": false
   }
 }
