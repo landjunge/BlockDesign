@@ -12,6 +12,8 @@ from urllib.parse import urlparse, unquote
 from host import Host, PROJECT
 from ai_adapter import AIAdapter, ContractError
 from design_workflow import DesignWorkflow
+from workflow_profile import load_workflow_profile, WorkflowProfileError
+from static_assets import read_asset, AssetUnavailable
 
 class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -59,12 +61,19 @@ class Handler(SimpleHTTPRequestHandler):
             try: self.reply(self.server.adapter.get(path.removeprefix('/api/tasks/')))
             except ContractError as e:self.reply({'error':str(e)},404)
             return
-        target=(PROJECT/path.lstrip('/')).resolve()
-        if path=='/':target=PROJECT/'index.html'
-        if not target.is_relative_to(PROJECT) or not (target==PROJECT/'index.html' or
-          target.is_relative_to(PROJECT/'src') or target.is_relative_to(PROJECT/'styles')):
-            self.send_error(404);return
-        super().do_GET()
+        self.static_response(path)
+    def do_HEAD(self):
+        if not self.local_request():return
+        self.static_response(unquote(urlparse(self.path).path), head_only=True)
+    def static_response(self, path, head_only=False):
+        try:raw, modified=read_asset(PROJECT,path)
+        except AssetUnavailable:self.send_error(404);return
+        self.send_response(200)
+        self.send_header('Content-Type',self.guess_type('index.html' if path=='/' else path))
+        self.send_header('Content-Length',str(len(raw)))
+        self.send_header('Last-Modified',self.date_time_string(modified))
+        self.end_headers()
+        if not head_only:self.wfile.write(raw)
     def local_request(self):
         allowed={f'127.0.0.1:{self.server.server_port}',f'localhost:{self.server.server_port}'}
         if self.headers.get('Host') not in allowed:
@@ -136,8 +145,12 @@ class Handler(SimpleHTTPRequestHandler):
         # No request payloads or user instructions in console logs.
         sys.stderr.write(fmt % args + '\n')
 
-def main():
-    p=argparse.ArgumentParser();p.add_argument('--port',type=int,default=5190);a=p.parse_args()
+def main(argv=None):
+    p=argparse.ArgumentParser();p.add_argument('--port',type=int,default=5190)
+    p.add_argument('--workflow-profile', help='Private operator JSON or BD_WORKFLOW_PROFILE')
+    a=p.parse_args(argv)
+    try:workflow_profile=load_workflow_profile(a.workflow_profile)
+    except WorkflowProfileError as exc:p.exit(2,f'[{exc.code}] {exc}\n')
     server=ThreadingHTTPServer(('127.0.0.1',a.port),partial(Handler,directory=str(PROJECT)))
     server.host=Host()
     server.adapter=AIAdapter(server.host)
@@ -146,8 +159,9 @@ def main():
         server.host.context(lambda c:c.write_own_record('projects:write','project-storage',{'format':FORMAT,'root':str(project_root)}),'projects:write')
     else:server.host.context(lambda c:c.read_own_data(),'projects:write')
     server.projects=ProjectStore(project_root)
-    # A trusted embedding may supply a fixed client/profile. Browser requests cannot.
-    server.design_workflow=DesignWorkflow(server.projects)
+    # Only trusted startup may select the existing fixed client/profile.
+    # No browser input configures a peer, path, principal or credential.
+    server.design_workflow=DesignWorkflow(server.projects, *(workflow_profile or (None, None)))
     print(f'BlockDesigner bereit http://127.0.0.1:{server.server_port} · {server.host.thread_id}',flush=True)
     server.serve_forever()
 if __name__=='__main__':main()

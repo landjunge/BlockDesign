@@ -143,6 +143,26 @@ Fachclient kann danach **An ThreadDesk übergeben · kein Start** ausführen. Er
 Rückfragen, Status und Entscheidung bleiben getrennte ausdrückliche Schritte.
 Nach Unterbrechung vorhandenen Lauf abfragen; keine neue Kennung als Wiederholung.
 
+Der optionale [Betreiber-Profilladeweg](docs/WORKFLOW-PROFILE.md) ist jetzt im
+bestehenden Start integriert: `./start.command --check --workflow-profile /absolute/private/workflow.json`
+prüft lokal und rein lesend; derselbe Aufruf ohne `--check` startet den vorhandenen
+Host mit festem Client/Projektprofil. Kein Agent startet dadurch. `BD_WORKFLOW_PROFILE`
+ist die alternative lokale Auswahl; Datei/Bridge-Konfiguration bleiben privat,
+Browserdaten können weder URLs noch Rechte festlegen. Profil, Bridge-Konfiguration
+und referenzierte Zugangsdaten/TLS-Dateien müssen außerhalb des gesamten Editorprojekts
+liegen; auch `0600` macht sie nicht zu öffentlichen Assets. Ohne explizites Profil bleibt
+das bisherige Verhalten erhalten. Fehlendes kompatibles SDK blockiert verständlich,
+keine Installation. [DE/EN-Vorlage, Grenzen und Rückweg](docs/WORKFLOW-PROFILE.md).
+
+The existing startup now accepts an optional private operator profile through
+`--workflow-profile` or `BD_WORKFLOW_PROFILE`. Run `--check` first: local prerequisites
+only, no network, database, model or server launch. Without `--check`, the existing
+host receives that fixed client/profile; explicit issue/start are still separate.
+No browser URLs/tokens or permission expansion. Configuration/credential/TLS paths
+must stay outside the entire editor project; private `0600` files are not public assets.
+Without a profile, the default
+remains unavailable. See the [DE/EN configuration example](docs/WORKFLOW-PROFILE.md).
+
 Der Standardstart richtet diesen Zugang **nicht** ein: Ohne Backend-Projektprofil
 und optionales KiraBridge-SDK meldet das Panel die fehlende Voraussetzung und hält
 Übergabe/Start gesperrt. Browsertexte können keine Rechte, Peeradressen, Quellpfade,
