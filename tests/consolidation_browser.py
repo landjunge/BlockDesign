@@ -49,7 +49,7 @@ def run():
         )
         assert check.returncode == 2 and json.loads(check.stdout)["setup_required"]
         assert not Path(temporary + "/board").exists()
-        setup = subprocess.run(
+        subprocess.run(
             [str(ROOT / "start.command"), "--setup"],
             cwd=ROOT,
             env=env,
