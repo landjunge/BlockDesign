@@ -1,5 +1,6 @@
 """Loopback-only browser host; static ES modules, existing ThreadDesk facade."""
 import argparse
+import asyncio
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import json
@@ -10,11 +11,24 @@ import sys
 from urllib.parse import urlparse, unquote
 from host import Host, PROJECT
 from ai_adapter import AIAdapter, ContractError
+from design_workflow import DesignWorkflow
 
 class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         path = unquote(urlparse(self.path).path)
         if not self.local_request(): return
+        if path.startswith('/api/design/workflows/'):
+            parts=path.split('/')
+            try:
+                if len(parts)!=6:raise ContractError('unknownTask')
+                with self.server.projects.transaction():
+                    value=self.server.design_workflow.load(parts[4],parts[5])
+                    public=self.server.design_workflow.public(value)
+                    public['stale']=self.server.projects.read(parts[4])['head']!=value['snapshot_id']
+                    self.reply(public)
+            except (ContractError,ValueError) as e:self.reply({'error':str(e)},400)
+            except Exception:self.reply({'error':'designBridgeUnknown'},503)
+            return
         if path.startswith('/api/design/preview/'):
             try:
                 raw=self.server.projects.preview(path.removeprefix('/api/design/preview/'))
@@ -62,6 +76,19 @@ class Handler(SimpleHTTPRequestHandler):
         if origin and origin not in {f'http://127.0.0.1:{self.server.server_port}',f'http://localhost:{self.server.server_port}'}:
             self.reply({'error':'originRejected'},403);return
         path=urlparse(self.path).path
+        if path=='/api/design/workflows':
+            try:
+                length=int(self.headers.get('Content-Length','0'))
+                if not 0<length<=8000 or self.headers.get_content_type()!='application/json':raise ContractError('contextTooLarge')
+                packet=json.loads(self.rfile.read(length))
+                if set(packet)=={'project_id','snapshot_id','instruction'}:
+                    self.reply(self.server.design_workflow.prepare(packet['project_id'],packet['snapshot_id'],packet['instruction']))
+                elif set(packet)=={'project_id','id','action','data'}:
+                    self.reply(asyncio.run(self.server.design_workflow.action(packet['project_id'],packet['id'],packet['action'],packet['data'])))
+                else:raise ContractError('invalidAction')
+            except (ContractError,ValueError) as e:self.reply({'error':str(e) if isinstance(e,ContractError) else 'invalidAction'},400)
+            except Exception:self.reply({'error':'designBridgeUnknown'},503)
+            return
         if path=='/api/design/import':
             try:
                 length=int(self.headers.get('Content-Length','0'))
@@ -119,6 +146,8 @@ def main():
         server.host.context(lambda c:c.write_own_record('projects:write','project-storage',{'format':FORMAT,'root':str(project_root)}),'projects:write')
     else:server.host.context(lambda c:c.read_own_data(),'projects:write')
     server.projects=ProjectStore(project_root)
+    # A trusted embedding may supply a fixed client/profile. Browser requests cannot.
+    server.design_workflow=DesignWorkflow(server.projects)
     print(f'BlockDesigner bereit http://127.0.0.1:{server.server_port} · {server.host.thread_id}',flush=True)
     server.serve_forever()
 if __name__=='__main__':main()

@@ -11,6 +11,7 @@ import { mountMyspace } from './panels/myspace.js';
 import { createProjects, mountProjects } from './bridge/projects.js';
 import { mountAI } from './panels/ai-space.js';
 import { mountSource } from './panels/source.js';
+import { mountDesignWorkflow } from './bridge/design-workflow.js';
 
 export async function mount(root = document) {
   const store = createStore();
@@ -21,6 +22,7 @@ export async function mount(root = document) {
   mountHeader(store,root);mountSidebars(store,root);mountMonitor(store,root);mountSelection(store,root);mountMyspace(store,root,projects);mountInput(store,root,workspace,help);
   mountProjects(projects,store,root);mountAI(store,root,projects);
   mountSource(store,root,projects);
+  mountDesignWorkflow(store,root,projects);
   translate(root,store.getState().ui.language);
   // Read-only inspection for acceptance, no alternative mutable document path.
   window.blockDesigner = Object.freeze({ getState: store.getState });

@@ -34,6 +34,15 @@
         </form>
         <p id="source-info" role="status" class="np-meta source-info"></p>
       </details>
+      <details class="np-disclosure" id="code-panel"><summary data-i18n="codeWorkflow"></summary>
+        <p class="np-meta" data-i18n="codeHint"></p>
+        <label class="np-field"><span data-i18n="order"></span><textarea id="code-order" maxlength="1000" rows="3"></textarea></label>
+        <button id="code-prepare" class="np-button" data-i18n="codePrepare"></button>
+        <p id="code-status" class="np-meta source-info" role="status"></p>
+        <div class="code-actions"><button id="code-issue" class="np-button" data-i18n="codeIssue" disabled></button><button id="code-start" class="np-button" data-i18n="codeStart" disabled></button><button id="code-refresh" class="np-button" data-i18n="codeRefresh" disabled></button></div>
+        <label id="code-answer-field" class="np-field" hidden><span data-i18n="answer"></span><textarea id="code-answer" rows="2" maxlength="1000"></textarea><button id="code-answer-send" class="np-button" data-i18n="answer"></button></label>
+        <div id="code-result" hidden><p id="code-summary" class="np-meta"></p><img id="code-preview" class="code-preview" alt=""><p class="np-meta" data-i18n="codeUnverified"></p><label class="np-field"><span data-i18n="codeDecisionNote"></span><textarea id="code-note" rows="2" maxlength="1000"></textarea></label><div class="code-actions"><button id="code-accept" class="np-button" data-i18n="commit"></button><button id="code-rework" class="np-button" data-i18n="codeRework"></button><button id="code-reject" class="np-button" data-i18n="discard"></button></div></div>
+      </details>
     </aside>
     <section class="workspace" aria-label="Workspace">
       <div class="viewport" id="viewport">

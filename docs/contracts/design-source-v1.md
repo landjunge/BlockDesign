@@ -5,9 +5,11 @@ is now used by a local inert-reference importer and static element mapping.
 BD-C04 issuance/run/return integration remains with ThreadDesk/KiraBridge.
 There is no new work queue, executable HTML endpoint or automatic deployment.
 
-A design descriptor extends the existing `threaddesk.handoff.v1` at
-`context.design`; outer handoff/task/run identity and issuance remain governed by
-ThreadDesk/KiraBridge. No second work-order format replaces those contracts.
+A design descriptor travels as an immutable existing ThreadDesk file reference
+with its actual SHA256 in the bound note. Outer handoff/task/run identity and
+issuance remain governed by ThreadDesk/KiraBridge. The previously prepared
+`context.design` extension is not needed or claimed by this adapter. No second
+work-order format replaces those contracts.
 The descriptor's own `format` is `blockdesigner.source.v1`. The prepared
 [JSON Schema](design-source-v1.schema.json) fixes the descriptor shape/limits.
 The local implementation carries an inert PNG preview only; requested_style is
@@ -105,5 +107,8 @@ coordinator verifies the actual saved snapshot; no caller Boolean grants rights.
 This function is **not** an issued handoff, dispatch, MCP endpoint or return.
 
 Existing Whiteboard/Ollama box tasks are unchanged and do not receive original
-HTML or the new design descriptor. Full code-agent handoff/new-preview acceptance
-belongs to BD-C04 with the coordinator. See architecture.md and README.md.
+HTML or the new design descriptor. The optional BD-C04 adapter verifies actual
+saved project/CAS bytes and uses existing file/note/issued/run/return contracts;
+its default configuration remains unavailable for dispatch. New previews are
+bound unverified artifacts, never an automatic design overwrite. See
+[architecture](../architecture.md) and [actual acceptance](../acceptance/HANDOFF-20261018.md).
