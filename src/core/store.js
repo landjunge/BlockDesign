@@ -12,9 +12,10 @@ export const frame = (s) =>
       'selection',
       'grid',
       'myspace',
-    ].map((k) => [k, clone(s[k])]),
+      'design',
+    ].map((k) => [k, clone(k === 'design' ? s[k] ?? null : s[k])]),
   );
-const signature = (s) => JSON.stringify([s.document, s.boxes, s.nextNumber, s.grid, s.myspace]);
+const signature = (s) => JSON.stringify([s.document, s.boxes, s.nextNumber, s.grid, s.myspace, s.design ?? null]);
 export function createStore(initial = initialState()) {
   let state = validateState(clone(initial)),
     undo = [],
@@ -136,6 +137,7 @@ export function createStore(initial = initialState()) {
           const next = validateState({
             ...clone(state),
             ...clone(item.state),
+            design: clone(item.state.design ?? null),
             revision: state.revision + 1,
             ui: { ...state.ui, grabbed: null, preview: null, notice: action.type, error: false },
           });

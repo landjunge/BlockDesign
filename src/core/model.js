@@ -1,4 +1,5 @@
 import { PALETTE, orientation } from './palette.js';
+import { validateDesign } from './design.js';
 
 export const VERSION = 1;
 export const TYPES = ['Box', 'Button', 'Textfeld', 'Checkbox', 'Dropdown', 'Modul', 'Karte', 'Leiste', 'Header', 'Footer', 'Sidebar'];
@@ -12,7 +13,7 @@ export function initialState() {
     version: VERSION, revision: 0, document: { width: 1000, height: 640 },
     boxes: [], nextNumber: 1, creationCounts: [0, 0, 0], activeLayer: 1, selection: [],
     grid: { spacing: 20, magnet: 2, enabled: true },
-    myspace: [], tasks: [],
+    myspace: [], tasks: [], design: null,
     ui: { language: 'de', view: 'structure', zoom: .75, grabbed: null, preview: null,
       monitor: { x: 240, y: 136, last: null }, notice: '', noticeArgs: {}, error: false },
   };
@@ -70,5 +71,6 @@ export function validateState(state) {
     new Set(state.selection).size !== state.selection.length || state.selection.some(id => !ids.has(id) || editable(state, id).layer !== state.activeLayer)) throw new Error('invalidSelection');
   if (!finite(state.grid.spacing) || state.grid.spacing < .25 || state.grid.spacing > 1000 || !finite(state.grid.magnet) ||
     state.grid.magnet < 0 || state.grid.magnet > state.grid.spacing / 2 || typeof state.grid.enabled !== 'boolean') throw new Error('invalidGrid');
+  validateDesign(state.design, state.boxes);
   return state;
 }

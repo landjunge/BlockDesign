@@ -33,7 +33,7 @@ MySpace → Historie zeigt frühere Stände. Ansehen verändert nichts; Wiederhe
 
 KI-Aufträge verwenden den bestehenden Whiteboard-/Ollama-Weg und das bereits installierte lokale Modell aus `ai-config.json`. Folgeaufträge enthalten relevante vorherige Aufträge/Ergebnisse und die aktuelle Auswahl; ein Auswahlwechsel wird sichtbar benannt. Rückfragen können beantwortet werden. Ohne Auswahl fragt zunächst BlockDesigner nach dem gewünschten Bezug; das ist klar von echten Modellantworten getrennt. Bei Verbindungsabbruch zunächst „Status abrufen“; kein automatischer Modellneustart. Ungültige/duplizierte/veraltete Rückgaben und fremde Ziele werden nicht angewendet. Kein Modellcode wird ausgeführt.
 
-Die lokale Historie schützt **nicht vor Ausfall desselben Datenträgers**. Projektdaten werden nicht nach GitHub oder an externe Dienste übertragen. Externe Backups, Mikrofon, Import/Export, Symbolbibliothek und MCP sind nicht Bestandteil dieses Umbaus. Sprachverständnis bleibt fehlbar; Vorschau und Rückfragen erleichtern die Kontrolle. Technische Abnahme ersetzt die Nutzerbewertung nicht.
+Die lokale Historie schützt **nicht vor Ausfall desselben Datenträgers**. Projektdaten werden nicht nach GitHub oder an externe Dienste übertragen. Externe Backups, Mikrofon, Webseitenexport, Symbolbibliothek und MCP bleiben offen; der begrenzte Referenzimport ist unten beschrieben. Sprachverständnis bleibt fehlbar; Vorschau und Rückfragen erleichtern die Kontrolle. Technische Abnahme ersetzt die Nutzerbewertung nicht.
 
 ```sh
 npm test
@@ -126,7 +126,46 @@ shortcuts. Help uses the same shortcut registry; Escape restores focus.
 Projects, MySpace, conversation and monotone Undo/Redo/snapshots use existing local
 format1 storage. History is on the same disk, not an external backup. An uncertain
 AI task is read before any retry. Existing Whiteboard/Ollama and conservative
-preview/apply rules remain; no KiraBridge/MCP, HTML import, DOM mapping or website
-export is claimed. The [prepared source/reference boundary](docs/contracts/design-source-v1.md)
-extends a future ThreadDesk `context.design`; it is not an implemented importer.
+preview/apply rules remain. The reference import below stores an inert PNG and
+optionally indexes static HTML IDs. It does not run an HTML page or prove its runtime
+DOM/functionality. No KiraBridge/MCP handoff, code change or website export is claimed.
+The [source/reference boundary](docs/contracts/design-source-v1.md) describes this
+local design; integration into ThreadDesk `context.design` remains separate.
 Technical evidence is separate from user acceptance and a distributed release.
+
+## Referenz und Originalbezug / Reference and original element
+
+MySpace → **Referenz importieren**: PNG-Vorschau auswählen, optional die zugehörige
+UTF-8-HTML-Datei für genaue Original-IDs. Referenzviewport in CSS-Pixeln ausdrücklich
+angeben und dann importieren; PNG-Pixel allein belegen diesen nicht (HiDPI).
+Der vorhandene Speicher
+sichert zuerst, danach erscheint der Hintergrund unter allen drei bearbeitbaren
+Ebenen. Originaldateien werden weder geändert noch ausgeführt. Kein Agent startet.
+PNG und HTML erhalten getrennte SHA256; Quellcommit bleibt sichtbar unbekannt.
+Der Zusammenhang zwischen selbst gewähltem PNG und HTML ist von dir zu prüfen.
+Das Bild wird proportional ab0/0 ins Dokument eingepasst; Referenzviewport und
+Dokumentzoom bleiben getrennt und gespeichert. Kein Verzerren oder Mobilstapeln.
+
+Box auswählen → **Auswahl** → **Änderung am Original**: Verschieben/Ersetzen/Neu.
+Eine genaue statische HTML-ID wählen und **Bezug sichern**. Gleich aussehende
+Buttons mit verschiedenen IDs bleiben verschieden; doppelte/fehlende IDs ergeben
+eine sichtbare Rückfrage. Nach neuer Quelle werden bisherige Bezüge veraltet,
+bis sie ausdrücklich neu zugeordnet sind. „Neu“ behauptet kein Originalelement.
+Dies ist ein Entwurf, noch keine Änderung oder Funktionsprüfung des Originalcodes.
+
+MySpace → **Import reference**: select a PNG and optionally its UTF-8 HTML source,
+and declare its reference viewport in CSS pixels, then import. PNG pixel dimensions
+alone do not prove that viewport (HiDPI). The existing project store saves before displaying the inert background.
+Choose a box → **Selection** → **Original change** → Move/Replace/Add new and an
+exact static source ID → **Save reference**. Missing/duplicate IDs require an explicit
+answer; a changed source leaves old mappings visibly stale. Original files never run
+or change. Separate image/source hashes and an unknown source commit remain honest;
+matching image and HTML is the user's responsibility. This is a design, not a coding
+task, runtime DOM proof or functional acceptance.
+
+Limits: PNG RGB/RGBA8 without interlace/animation, up to1MiB and4Megapixels;
+HTML up to256KiB; at most256 indexed ID occurrences/references. Scripts/resources
+are not loaded; template/noscript IDs remain unresolved. Functionality, dynamically
+created elements and automatic HTML rendering are outside this local import.
+Old documents remain readable; Undo/Redo/History preserve reference and mapping.
+[Checks and limits / Prüfung](docs/acceptance/IMPORT-20261018.md).

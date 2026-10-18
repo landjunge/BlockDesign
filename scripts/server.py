@@ -15,6 +15,12 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         path = unquote(urlparse(self.path).path)
         if not self.local_request(): return
+        if path.startswith('/api/design/preview/'):
+            try:
+                raw=self.server.projects.preview(path.removeprefix('/api/design/preview/'))
+                self.send_response(200);self.send_header('Content-Type','image/png');self.send_header('Content-Length',str(len(raw)));self.send_header('Cache-Control','private, max-age=31536000, immutable');self.end_headers();self.wfile.write(raw)
+            except (ContractError,OSError):self.reply({'error':'designMissingArtifact'},404)
+            return
         if path=='/api/projects':
             try:self.reply({'format':FORMAT,'projects':self.server.projects.list()})
             except Exception:self.reply({'error':'saveFailed'},503)
@@ -56,6 +62,14 @@ class Handler(SimpleHTTPRequestHandler):
         if origin and origin not in {f'http://127.0.0.1:{self.server.server_port}',f'http://localhost:{self.server.server_port}'}:
             self.reply({'error':'originRejected'},403);return
         path=urlparse(self.path).path
+        if path=='/api/design/import':
+            try:
+                length=int(self.headers.get('Content-Length','0'))
+                if not 0<length<=1800000 or self.headers.get_content_type()!='application/json':raise ContractError('designSourceLimit')
+                self.reply(self.server.projects.import_design(json.loads(self.rfile.read(length))))
+            except (ContractError,ValueError) as e:self.reply({'error':str(e) if isinstance(e,ContractError) else 'designInvalidSource'},400)
+            except Exception:self.reply({'error':'saveFailed'},503)
+            return
         if path.startswith('/api/projects/'):
             try:
                 parts=path.split('/');length=int(self.headers.get('Content-Length','0'))

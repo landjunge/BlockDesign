@@ -120,3 +120,7 @@ dialog::backdrop { background: #0009; }
 
 /* Existing undo/redo actions, curved symbols with localized accessible names. */
 #undo, #redo { font-size: var(--np-title); }
+/* Inert reference under all existing editable layers; same document zoom. */
+.source-background{position:absolute;left:0;top:0;z-index:0;pointer-events:none;user-select:none;max-width:none}
+.source-info{overflow-wrap:anywhere}
+#source-form input[type="file"]{max-width:100%;font-size:var(--np-meta)}

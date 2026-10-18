@@ -254,8 +254,9 @@ export function createProjects(store, request = fetch) {
     },
     // Save a validated resulting document before exposing the change. This is
     // also the gateway for explicit design-proposal application.
-    async apply(action, meta = {}) {
+    async apply(action, meta = {}, scope = {}) {
       return queue(async () => {
+        if (scope.project_id !== undefined && scope.project_id !== project) throw Error('designStale');
         clearTimeout(timer);
         paused = true;
         store.lock(true);

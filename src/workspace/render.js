@@ -1,6 +1,22 @@
 import { center, descendants } from '../core/geometry.js';
 import { tint } from '../core/palette.js';
 import { t } from '../i18n.js';
+import { sourceTransform } from '../core/design.js';
+
+function background(canvas, state, onerror = null) {
+  let image = canvas.querySelector('.source-background');
+  if (!state.design) { image?.remove(); return; }
+  if (!image) {
+    image = document.createElement('img'); image.className = 'source-background'; image.alt = '';
+    image.draggable = false; image.setAttribute('aria-hidden', 'true');
+    if (onerror) image.addEventListener('error', onerror);
+    canvas.prepend(image);
+  }
+  const hash = state.design.preview.artifact_sha256, scale = sourceTransform(state).scale;
+  if (image.dataset.hash !== hash) { image.dataset.hash = hash; image.src = '/api/design/preview/' + hash; }
+  image.style.width = state.design.source.reference_viewport.width * scale + 'px';
+  image.style.height = state.design.source.reference_viewport.height * scale + 'px';
+}
 
 function boxDepth(box, boxes) {
   let depth = 0,
@@ -56,6 +72,7 @@ export function renderSnapshotPreview(container, s) {
   canvas.style.transform = `scale(${zoom})`;
   sizer.style.height = `${s.document.height * zoom}px`;
   canvas.style.backgroundSize = `${s.grid.spacing}px ${s.grid.spacing}px`;
+  background(canvas, s);
   sizer.append(canvas);
   container.append(sizer);
   const sorted = [...s.boxes].sort(
@@ -120,6 +137,7 @@ export function mountWorkspace(store, root) {
     canvas.style.backgroundSize = `${s.grid.spacing}px ${s.grid.spacing}px`;
     canvas.style.setProperty('--hit', `${28 / s.ui.zoom}px`);
     canvas.style.backgroundImage = s.grid.enabled && s.ui.view === 'structure' ? '' : 'none';
+    background(canvas, s, () => store.dispatch({ type: 'notice', message: 'designMissingArtifact', error: true }));
     for (const [id, el] of elements)
       if (!s.boxes.some((b) => b.id === id)) {
         el.remove();

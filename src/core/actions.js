@@ -1,6 +1,7 @@
 import { clone, editable, primary, newBox, validatePatch } from './model.js';
 import { PALETTE } from './palette.js';
 import { descendants, move, moveSelection, resize, scale } from './geometry.js';
+import { bindElement } from './design.js';
 
 const touch = s => { s.revision++; };
 function patch(s, id, changes) {
@@ -38,6 +39,23 @@ export function reduce(state, action) {
   if (!action || action.version !== 1) throw new Error('invalidAction');
   const s = clone(state), a = action;
   switch (a.type) {
+    case 'designImport': {
+      if (a.expected_revision !== s.revision) throw Error('designStale');
+      if (s.ui.grabbed || s.ui.preview || s.ui.aiPreview) throw Error('finishGesture');
+      const bindings = clone(s.design?.bindings || {});
+      if (s.design && JSON.stringify(s.design.source.reference_viewport) !== JSON.stringify(a.design?.source?.reference_viewport)) {
+        for (const binding of Object.values(bindings)) if (binding.source_element) binding.source_element.resolution = 'unresolved';
+      }
+      s.design = { ...clone(a.design), bindings };
+      touch(s); break;
+    }
+    case 'designBind': {
+      editable(s, a.id);
+      if (s.ui.grabbed || s.ui.preview || s.ui.aiPreview) throw Error('finishGesture');
+      const binding = bindElement(s, a);
+      s.design.bindings = { ...s.design.bindings, [a.id]: binding };
+      touch(s); break;
+    }
     case 'create': {
       const i = s.activeLayer - 1, offset = s.creationCounts[i] * 5;
       const x = (s.document.width - 50) / 2 + offset, y = (s.document.height - 50) / 2 + offset;

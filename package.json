@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "start": "./start.command",
-    "test": "node --test tests/core.test.js",
+    "test": "node --test tests/core.test.js tests/design.test.js",
     "browser": "/Users/landjunge/threaddesk/.venv/bin/python tests/browser_acceptance.py",
     "browser:upgrade": "/Users/landjunge/threaddesk/.venv/bin/python tests/upgrade_browser.py",
-    "browser:zoom": "/Users/landjunge/threaddesk/.venv/bin/python tests/native_zoom.py"
+    "browser:zoom": "/Users/landjunge/threaddesk/.venv/bin/python tests/native_zoom.py",
+    "browser:import": "/Users/landjunge/threaddesk/.venv/bin/python tests/import_browser.py"
   }
 }

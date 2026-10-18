@@ -16,6 +16,7 @@ from threading import RLock
 from uuid import uuid4
 from ai_adapter import validate_snapshot, ContractError, require, patch_values, ID
 from threaddesk.storage.artifacts import ContentAddressedArtifacts
+from design_source import validate_design, imported, decode_upload, png_size, catalog, MAX_PNG, MAX_HTML
 
 FORMAT=1
 UUID=re.compile(r'[a-f0-9-]{36}\Z')
@@ -43,6 +44,7 @@ def validate_body(body):
     snapshot={k:deepcopy(state[k]) for k in ['version','revision','document','boxes','selection','activeLayer','grid']}
     snapshot.update(coordinates={'origin':[0,0],'x':'right','y':'down','unit':'px','pixel_scale':1},zoom=ui.get('zoom'),language=ui.get('language'))
     validate_snapshot(snapshot,max_boxes=10000)
+    validate_design(state.get('design'), [box['id'] for box in state['boxes']])
     require(type(state.get('nextNumber'))==int and state['nextNumber']>max([0]+[b['number'] for b in state['boxes']]),'invalidIdentity')
     require(isinstance(state.get('creationCounts'),list) and len(state['creationCounts'])==3 and all(type(x)==int and x>=0 for x in state['creationCounts']),'invalidDocument')
     require(isinstance(state.get('tasks'),list) and isinstance(state.get('myspace'),list),'invalidDocument')
@@ -56,7 +58,7 @@ def validate_body(body):
         require(isinstance(history[kind],list),'storageFormat')
         for frame in history[kind]:
             require(isinstance(frame,dict) and isinstance(frame.get('state'),dict),'storageFormat')
-            prior={**state,**frame['state']};prior_body={'format':1,'state':prior,'history':{'undo':[],'redo':[]}}
+            prior={**state,**frame['state'],'design':frame['state'].get('design')};prior_body={'format':1,'state':prior,'history':{'undo':[],'redo':[]}}
             validate_body(prior_body)
     return body
 
@@ -79,12 +81,52 @@ class ProjectStore:
         require(isinstance(project_id,str) and UUID.fullmatch(project_id),'unknownProject')
         return self.root/'projects'/project_id
     def blob(self,value):
-        raw=encoded(value);stage=self.cas.stage(raw,self.root/'staging')
+        return self.raw_blob(encoded(value))
+    def raw_blob(self,raw):
+        stage=self.cas.stage(raw,self.root/'staging')
         # stage/publish is existing code; add durability around publication.
         with stage.open('rb') as stream:os.fsync(stream.fileno())
         artifact=self.cas.publish(stage);sync_dir(self.cas.root)
         if stage.exists():stage.unlink()
         return artifact.sha256
+    def raw(self,digest,limit):
+        require(isinstance(digest,str) and HASH.fullmatch(digest),'designInvalidSource')
+        path=self.cas.root/digest
+        import stat
+        try:
+            fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK)
+            with os.fdopen(fd,'rb') as stream:
+                info=os.fstat(stream.fileno());require(stat.S_ISREG(info.st_mode) and info.st_size<=limit,'designMissingArtifact')
+                raw=stream.read(limit+1)
+        except OSError:raise ContractError('designMissingArtifact') from None
+        require(len(raw)<=limit and hashlib.sha256(raw).hexdigest()==digest,'designMissingArtifact')
+        return raw
+    def import_design(self,packet):
+        require(isinstance(packet,dict) and set(packet)<= {'preview_base64','html_base64','reference_viewport'} and 'preview_base64' in packet,'designInvalidSource')
+        with self.transaction():
+            preview=decode_upload(packet['preview_base64'],MAX_PNG)
+            original=decode_upload(packet['html_base64'],MAX_HTML) if packet.get('html_base64') is not None else None
+            value=imported(preview,original,packet.get('reference_viewport'))
+            self.raw_blob(preview)
+            if original is not None:self.raw_blob(original)
+        return value
+    def preview(self,digest):
+        raw=self.raw(digest,MAX_PNG);png_size(raw);return raw
+    def check_design_artifacts(self,body):
+        seen={}
+        states=[body['state']]+[frame['state'] for kind in ['undo','redo'] for frame in body['history'][kind]]
+        for state in states:
+            design=state.get('design')
+            if design is None:continue
+            key=(design['source']['artifact_sha256'],design['preview']['artifact_sha256'],design['source']['media_type'])
+            if key not in seen:
+                preview=self.preview(key[1]);source=design['source']
+                entries=[] if source['media_type']=='image/png' else catalog(self.raw(key[0],MAX_HTML))
+                seen[key]=(png_size(preview),entries)
+            size,entries=seen[key]
+            viewport=design['source']['reference_viewport']
+            require(size['width']*viewport['height']==size['height']*viewport['width'],'designViewportMismatch')
+            require(entries==design['catalog'] and (design['source']['media_type']!='image/png' or key[0]==key[1]),'designInvalidSource')
     def read_blob(self,digest):
         require(isinstance(digest,str) and HASH.fullmatch(digest),'storageCorrupt')
         raw=(self.cas.root/digest).read_bytes();require(hashlib.sha256(raw).hexdigest()==digest,'storageCorrupt');return json.loads(raw)
@@ -102,7 +144,7 @@ class ProjectStore:
         if 'boxes' in chunks:state['boxes']=self.read_blob(chunks['boxes'])
         state['myspace']=self.read_blob(chunks['myspace']);state['tasks']=self.read_blob(chunks['conversation']);state['ui']=self.read_blob(chunks['ui'])
         history={k:[{'state':self.unpack_frame(f['state']),'label':f['label']} for f in chunks['history'][k]] for k in ['undo','redo']}
-        return validate_body({'format':FORMAT,'state':state,'history':history})
+        body=validate_body({'format':FORMAT,'state':state,'history':history});self.check_design_artifacts(body);return body
     def commits(self,project_id):
         folder=self.folder(project_id);require(folder.exists(),'unknownProject')
         valid=[];damaged=[];highest=0
@@ -145,7 +187,7 @@ class ProjectStore:
             return {'items':[{k:v for k,v in c.items() if k!='chunks'} for c in reversed(commits)],'damaged':damaged}
     def save(self,project_id,body,meta,base=None):
         with self.transaction():
-            validate_body(body);require(isinstance(meta,dict) and len(encoded(meta))<20000,'invalidValues')
+            validate_body(body);self.check_design_artifacts(body);require(isinstance(meta,dict) and len(encoded(meta))<20000,'invalidValues')
             folder=self.folder(project_id)
             if folder.exists():
                 commits,damaged,highest=self.commits(project_id);head=self.read(project_id)['head'] if commits else None
