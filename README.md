@@ -7,7 +7,7 @@ cd /Users/landjunge/blockdesigner
 ./start.command
 ```
 
-Browser: http://127.0.0.1:5190 . Terminal offen lassen; Ctrl+C beendet den Server. Bei belegtem Port `./start.command --port 5193`. Kein Buildschritt, keine CDN-Abhängigkeit. Vorhandener Python-3.12-Interpreter und ThreadDesk-Modulhost werden nach Vorabprüfung verwendet. `./start.command --setup` legt die eigene Modul-/Whiteboard-Bindung bei Bedarf an; bestehende Bindungen und deaktivierte Module bleiben erhalten. Repository: bestehendes `landjunge/blockdesign`, Branch `feat/compact-project-history`; kein Repository umbenannt oder gelöscht.
+Browser: http://127.0.0.1:5190 . Terminal offen lassen; Ctrl+C beendet den Server. Bei belegtem Port `./start.command --port 5193`. Kein Buildschritt, keine CDN-Abhängigkeit. Vorhandener Python-3.12-Interpreter und ThreadDesk-Modulhost werden nach Vorabprüfung verwendet. `./start.command --setup` legt die eigene Modul-/Whiteboard-Bindung bei Bedarf an; bestehende Bindungen und deaktivierte Module bleiben erhalten. Repository: bestehendes `landjunge/blockdesign`, konsolidierter `main`; die historische Produktbasis `feat/compact-project-history` bleibt erhalten. Kein Repository umbenannt oder gelöscht.
 
 H öffnet die vollständige Hilfe aus derselben Shortcut-Definition wie die Eingabesteuerung. Escape schließt und gibt den Fokus zurück. Während Texteingaben bleiben Editorkürzel gesperrt.
 
@@ -33,7 +33,7 @@ MySpace → Historie zeigt frühere Stände. Ansehen verändert nichts; Wiederhe
 
 KI-Aufträge verwenden den bestehenden Whiteboard-/Ollama-Weg und das bereits installierte lokale Modell aus `ai-config.json`. Folgeaufträge enthalten relevante vorherige Aufträge/Ergebnisse und die aktuelle Auswahl; ein Auswahlwechsel wird sichtbar benannt. Rückfragen können beantwortet werden. Ohne Auswahl fragt zunächst BlockDesigner nach dem gewünschten Bezug; das ist klar von echten Modellantworten getrennt. Bei Verbindungsabbruch zunächst „Status abrufen“; kein automatischer Modellneustart. Ungültige/duplizierte/veraltete Rückgaben und fremde Ziele werden nicht angewendet. Kein Modellcode wird ausgeführt.
 
-Die lokale Historie schützt **nicht vor Ausfall desselben Datenträgers**. Projektdaten werden nicht nach GitHub oder an externe Dienste übertragen. Externe Backups, Mikrofon, Webseitenexport, Symbolbibliothek und MCP bleiben offen; der begrenzte Referenzimport ist unten beschrieben. Sprachverständnis bleibt fehlbar; Vorschau und Rückfragen erleichtern die Kontrolle. Technische Abnahme ersetzt die Nutzerbewertung nicht.
+Die lokale Historie schützt **nicht vor Ausfall desselben Datenträgers**. Der normale Editor speichert lokal und lädt keine Projektdaten nach GitHub. Der optionale Codeauftrag unten übergibt nur ausdrücklich beauftragten Kontext an einen fest eingerichteten Backend-Zugang; dessen Agenten-/Providergrenzen gelten zusätzlich. Externe Backups, Mikrofon, Webseitenexport und Symbolbibliothek bleiben offen. Sprachverständnis bleibt fehlbar; Vorschau und Rückfragen erleichtern die Kontrolle. Technische Abnahme ersetzt die Nutzerbewertung nicht.
 
 ```sh
 npm test
@@ -128,10 +128,48 @@ format1 storage. History is on the same disk, not an external backup. An uncerta
 AI task is read before any retry. Existing Whiteboard/Ollama and conservative
 preview/apply rules remain. The reference import below stores an inert PNG and
 optionally indexes static HTML IDs. It does not run an HTML page or prove its runtime
-DOM/functionality. No KiraBridge/MCP handoff, code change or website export is claimed.
+DOM/functionality. The optional coding workflow below is separate; no website export is claimed.
 The [source/reference boundary](docs/contracts/design-source-v1.md) describes this
-local design; integration into ThreadDesk `context.design` remains separate.
+local design; the coding adapter attaches its immutable descriptor through existing ThreadDesk files/notes.
 Technical evidence is separate from user acceptance and a distributed release.
+
+## Codeauftrag und Rückvorschau / Coding task and returned preview
+
+MySpace → **Codeauftrag · Übergabe und Rückvorschau**: den Änderungswunsch eingeben
+und **Stand vorbereiten**. Das liest den tatsächlich gespeicherten Projekt-/Snapshot-
+und Elementstand; es startet keinen Agenten. Ein eingerichteter fester Backend-
+Fachclient kann danach **An ThreadDesk übergeben · kein Start** ausführen. Erst
+**Diesen Codeauftrag starten** verwendet den vorhandenen KiraBridge-M2-Lauf.
+Rückfragen, Status und Entscheidung bleiben getrennte ausdrückliche Schritte.
+Nach Unterbrechung vorhandenen Lauf abfragen; keine neue Kennung als Wiederholung.
+
+Der Standardstart richtet diesen Zugang **nicht** ein: Ohne Backend-Projektprofil
+und optionales KiraBridge-SDK meldet das Panel die fehlende Voraussetzung und hält
+Übergabe/Start gesperrt. Browsertexte können keine Rechte, Peeradressen, Quellpfade,
+Sitzungen oder Belege festlegen. Es gibt keinen zweiten Agentenstarter/Taskdienst.
+Die vorhandene lokale Whiteboard-/Ollama-Boxbearbeitung bleibt eigenständig.
+
+Gelieferte PNG und Codebezug erscheinen **ungeprüft**, neben dem Zielentwurf.
+Aktueller Projekt-/Snapshot-/Quellstand und tatsächliche Issued-/Run-/Returnbelege
+müssen passen. Ein späterer oder fremder Reply ändert den Entwurf nicht.
+Übernehmen/Nacharbeit/Verwerfen dokumentiert eine begründete Entscheidung über
+diese Lieferung; es wendet keine neue Referenz oder Codeänderung automatisch an
+und startet keine Nacharbeit. Quellcommit, Bild-/HTML-Beziehung und Funktion bleiben
+ohne gesonderten Nachweis unbekannt. Ein Betreiberentscheid ist kein Funktionstest.
+
+In **MySpace → Coding task**, prepare the exact saved version first, issue it
+through ThreadDesk separately, then explicitly start the existing Bridge workflow.
+Default startup has no configured backend identity/project profile and cannot
+dispatch coding work. The browser never receives tokens or controls a peer/path.
+Refresh reads the existing owned run; answering resumes its exact recorded session.
+Returned code/PNG is unverified and cannot replace a newer design. A reasoned
+decision is separate from delivery, functional verification and overall acceptance;
+rework does not start a new agent. Existing local box editing is unchanged.
+
+The source adapter was tested using real isolated MCP/ThreadDesk and an explicitly
+synthetic own CLI fixture, not a real model or installed-user runtime. A harmless
+HTML demo was actually edited and independently rendered to the exact delivered
+PNG hash. [Contract, operator prerequisites and DE/EN acceptance](docs/acceptance/HANDOFF-20261018.md).
 
 ## Referenz und Originalbezug / Reference and original element
 

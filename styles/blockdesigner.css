@@ -124,6 +124,7 @@ dialog::backdrop { background: #0009; }
 .source-background{position:absolute;left:0;top:0;z-index:0;pointer-events:none;user-select:none;max-width:none}
 .source-info{overflow-wrap:anywhere}
 .code-actions{display:flex;flex-wrap:wrap;gap:6px;margin-block:8px}
+.code-actions .np-button{white-space:normal;max-width:100%;overflow-wrap:anywhere}
 .code-preview{display:block;width:100%;height:auto;max-height:320px;object-fit:contain;object-position:top left}
 #code-panel textarea{width:100%;box-sizing:border-box;min-height:64px;resize:vertical}
 #source-form input[type="file"]{max-width:100%;font-size:var(--np-meta)}

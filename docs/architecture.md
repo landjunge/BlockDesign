@@ -101,3 +101,49 @@ Revision, kein HTML und kein zweiter KI-/Bridge-Auftragsweg. Neue Entwurfsmetada
 erhöhen dieselbe Revision und machen alte Boxantworten weiterhin veraltet.
 BD-C04 muss den exakt gespeicherten Stand mit dem zentralen Issued-/Run-Vertrag
 prüfen; der lokale Descriptor und sein `ready`-Flag sind keine Berechtigung.
+
+## Codeübergabe / BD-C04 · 18.10.2026
+
+`scripts/design_workflow.py` erzeugt serverseitig aus einem tatsächlichen aktuellen
+Projekt/Snapshot einen unveränderlichen Descriptor im vorhandenen CAS. Der optionale
+`FixedBridgeClient` verwendet vorhandene KiraBridge-MCP-Werkzeuge; seine lokale
+Konfiguration/Identität und die feste Projekt→CWD-/Dateinamen-Zuordnung kommen nur
+aus einem vertrauenswürdigen Betreiber-Embedding. Der normale Server startet ohne
+dieses Profil und verweigert Codeausführung. Es wird keine Konfiguration migriert,
+kein Geheimnis im Browser angelegt und keine vorhandene Runtime verändert.
+
+Die vorhandenen ThreadDesk-Verwaltungsoperationen create/set_note/add_file tragen
+den tatsächlichen Descriptor-SHA256 und immutable Descriptor-/HTML-/PNG-Dateien.
+Keine neue `context.design`-Mutation ist nötig. `handoff.issue` belegt den festen
+Issued-Stand mit tatsächlichen source_refs-Hashes; erst ein gesonderter Start
+verwendet den bestehenden M2-Code-Agenten. Frage/Antwort/Status/Inbox/Entscheidung
+verwenden dessen vorhandene Task-/Sitzungs-/Return-Verträge.
+
+`projects/{id}/design-workflows/{uuid}.json` ist eine additive, private, begrenzte
+Zuordnung (`blockdesigner.workflow-binding.v1`), **keine Queue**. Sie speichert
+Anfragehash und stabile Bridge-Task-ID vor dem Senden. Ein unklarer Versand liest
+danach ausschließlich task_get; kein Startup-Worker und keine automatische
+Wiederholung. Vorhersehbare IDs werden aus Projekt/Workflow/Schritt abgeleitet,
+originale ThreadDesk-task_id einschließlich Doppelpunkt bleibt unverändert.
+Projekt-/Snapshot-Revision, SHA256, Issued-/Run-/Return-ID und Principal werden
+getrennt geprüft. Derselbe feste Projektpfad darf keinen zweiten Start erhalten,
+solange ein vorheriger eigener Lauf ungeklärt ist. Keine OS-Sandbox behauptet.
+
+Der bestehende Projekt-/CAS-Lock und eine nicht wartende Aktionssperre serialisieren
+Schritte. Ein read-only Clientaufruf hat8s, ein Schritt insgesamt30s; lokale
+Abschlussabfragen sind begrenzt. Maximal64 Zuordnungen je Projekt,128 gespeicherte
+Operationsbezüge je Zuordnung,2MiB je Datensatz; keine automatische Bereinigung.
+PNG-/HTML-Grenzen des vorhandenen Importers gelten. Ausgaben lesen ausschließlich
+vereinbarte Dateinamen im festen CWD, nie beliebige Modellpfade. HTML bleibt inert.
+
+`src/bridge/design-workflow.js` steuert nur die kompakte bestehende MySpace-Ansicht
+und feste Host-APIs. GET `/api/design/workflows/{project}/{id}` liest die Zuordnung.
+POST `/api/design/workflows` bereitet einen konkreten gespeicherten Snapshot vor
+oder stößt genau eine erlaubte Schrittoperation an. Host-/Origin-/JSON-/CSP-
+Grenzen bleiben erhalten. Kein Polling führt implizit eine Ausführung aus;
+Neuladen stellt nur gespeicherte Ansicht wieder her. Fremde/veraltete Ergebnisdaten
+oder eine abweichende doppelte Entscheidung werden abgewiesen. Code/PNG bleiben
+unverified; Annahme ändert weder aktuellen Entwurf noch dessen Originalreferenz.
+
+Quell-/PNG-Lesen ist technisch lokal belegt, keine allgemeine Modellfunktion oder
+installierte Runtimeabnahme. [Prüfumfang und Betreiberweg DE/EN](acceptance/HANDOFF-20261018.md).

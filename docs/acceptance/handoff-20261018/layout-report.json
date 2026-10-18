@@ -1,0 +1,59 @@
+{
+  "scope": "new CSS wrap only; no Bridge/ThreadDesk service/CLI/model",
+  "languages": {
+    "de": [
+      {
+        "text": "An ThreadDesk \u00fcbergeben \u00b7 kein Start",
+        "whiteSpace": "normal",
+        "scroll": 189,
+        "client": 189,
+        "height": 40,
+        "within": true
+      },
+      {
+        "text": "Diesen Codeauftrag starten",
+        "whiteSpace": "normal",
+        "scroll": 189,
+        "client": 189,
+        "height": 40,
+        "within": true
+      },
+      {
+        "text": "Gespeicherten Lauf abfragen",
+        "whiteSpace": "normal",
+        "scroll": 189,
+        "client": 189,
+        "height": 40,
+        "within": true
+      }
+    ],
+    "en": [
+      {
+        "text": "Issue to ThreadDesk \u00b7 no execution",
+        "whiteSpace": "normal",
+        "scroll": 189,
+        "client": 189,
+        "height": 40,
+        "within": true
+      },
+      {
+        "text": "Start this coding task",
+        "whiteSpace": "normal",
+        "scroll": 165,
+        "client": 165,
+        "height": 40,
+        "within": true
+      },
+      {
+        "text": "Read saved run status",
+        "whiteSpace": "normal",
+        "scroll": 170,
+        "client": 170,
+        "height": 40,
+        "within": true
+      }
+    ]
+  },
+  "page_errors": [],
+  "css_sha256": "ef1506cf57ec505b8c2f6104c485e4f0a5e91ae161788efb690641e3c81a6b33"
+}

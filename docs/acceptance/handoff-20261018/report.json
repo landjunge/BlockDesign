@@ -1,0 +1,39 @@
+{
+  "kind": "own synthetic source/MCP fixture, not live/model acceptance",
+  "source": {
+    "original_html_sha256": "18601c298e625240a03fa34646902eb60ab5404add5386c03608acbe2395caf4",
+    "actual_html_sha256": "2d29c78fdfa959b47645561e62f7390b404df79a8dcf96f566b8997e124b7353",
+    "actual_png_sha256": "6ec54bc03b4eb7806dfdf04126630bb691e5b27ecc541afdc5d4b5f21fe1b7e7",
+    "delivered_png_sha256": "6ec54bc03b4eb7806dfdf04126630bb691e5b27ecc541afdc5d4b5f21fe1b7e7",
+    "button": {
+      "x": 100,
+      "y": 80,
+      "width": 160,
+      "height": 40
+    },
+    "agent_fixture_calls": 1
+  },
+  "cases": [
+    "exact_saved_source_and_selection",
+    "prepare_issue_no_execution",
+    "explicit_start_real_mcp_td_owned_fixture",
+    "actual_html_position_colour_changed",
+    "independent_render_png_hash_equal",
+    "return_unverified_no_design_mutation",
+    "reload_no_restart",
+    "explicit_separate_decision",
+    "language_saved_head_stale_blocks",
+    "default_profile_unavailable_no_execution_en"
+  ],
+  "errors": [],
+  "unexpected_requests": [],
+  "files": {
+    "scripts/design_workflow.py": "87f6ced436cc546e1e9fbb929e7418422ca6259af69ffbe139b5d26bc9d677b7",
+    "scripts/server.py": "6b116bb45cbabe7a24fd5a26a0239f5ca68d01def0bf7b3f1c79977aafa27bfc",
+    "src/bridge/design-workflow.js": "e1f14789a7db67b80d964b75dba4c0f831e9f9e273a2c12a6cd66a8f39d70183",
+    "src/app.js": "a4e227bcb31261a7e2e527e33f3c29ddbe1cd2e9a8d4a9158d8c94385d0fc201",
+    "src/i18n.js": "69a3b3722b45877170671903fe80ad99d0e6b9e47c600df985c7451844caa2bd",
+    "styles/blockdesigner.css": "de10771abb7f3b79965e2a7be99f87699fa44547abf177155aac1a377ad9e0b8",
+    "index.html": "1e0fc029f5d39676483d2bcbe4d7541d21054a7196eb6f35dc508b1f0df23f8d"
+  }
+}
