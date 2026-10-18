@@ -73,3 +73,31 @@ Editorfenster, Dokumentkoordinaten und Zielseiten-Referenzviewport bleiben getre
 [Design-source v1](contracts/design-source-v1.md) ist der vorbereitete Vertrag für
 BD-C02–04, noch kein Import-/MCP-/Bridge-Adapter. Keine Änderung an Box-/Projekt-
 Format1, Revision, UndoFrames oder historischen Daten.
+
+## Referenzimport / BD-C02–03 · 18.10.2026
+
+`core/design.js` prüft den additiven optionalen Dokumentteil `design`, berechnet
+die proportionale Referenz→Dokument-Abbildung und beschreibt `move/replace/new`
+im bestehenden Source-Vertrag. `panels/source.js` nutzt die bestehenden MySpace-
+und Auswahlpanels; dauerhafte Übernahme ausschließlich durch `projects.apply`.
+Reduceraktionen `designImport/designBind` prüfen Revision, aktuelle Quelle und
+Ebene. Die vorhandene Übernahmequeue prüft zusätzlich die erwartete Projekt-ID,
+damit ein später Upload nach Projektwechsel nicht bei gleicher Revision in ein
+fremdes Dokument gelangt. Ein Import verändert keine Boxidentität/Geometrie; ein Import-/Bindungsschritt
+ist ein vorhandener Undo-Schritt. Alte Inline-Frames ohne design stellen keine
+Referenz wieder her. `workspace/render.js` zeigt dasselbe inerte PNG in Dokument
+und Historie unter allen drei Boxebenen. Die bisherige Dokumentgröße bleibt erhalten.
+
+`scripts/design_source.py` prüft begrenzte PNG-/HTML-Bytes und einen statischen
+ID-Katalog, ohne eine Quelle auszuführen oder eine URL zu öffnen. `ProjectStore`
+publiziert Originalbytes im vorhandenen CAS; Dokument/Frames referenzieren Hashes,
+ohne PNG/HTML in jedem Undo-Frame zu wiederholen. Quelle/Vorschau/ID-Katalog werden
+bei dauerhafter Übernahme und erneutem Lesen geprüft. Nur PNG ist über den lokalen
+Server abrufbar. Keine neuen Rechte oder Modellaufrufe.
+
+Schema, Grenzen und spätere Ausgabebindung: [design-source-v1](contracts/design-source-v1.md).
+Die bisherige Whiteboard-Snapshotform bleibt erhalten: aktuelle Boxdaten und
+Revision, kein HTML und kein zweiter KI-/Bridge-Auftragsweg. Neue Entwurfsmetadaten
+erhöhen dieselbe Revision und machen alte Boxantworten weiterhin veraltet.
+BD-C04 muss den exakt gespeicherten Stand mit dem zentralen Issued-/Run-Vertrag
+prüfen; der lokale Descriptor und sein `ready`-Flag sind keine Berechtigung.

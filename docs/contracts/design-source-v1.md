@@ -1,18 +1,19 @@
-# Design source/reference contract v1 – preparation, not active import
+# Design source/reference contract v1 – local import; handoff remains separate
 
-BD-C01/D01/R01, seven-tools-build-20261018-1833. This document defines the
-next adapter boundary before BD-C02–04 implementation. It does not introduce a
-new job queue, executable endpoint, HTML importer or automatic deployment.
+BD-C01–03/D01/R01, seven-tools-build-20261018-1833. The original prepared boundary
+is now used by a local inert-reference importer and static element mapping.
+BD-C04 issuance/run/return integration remains with ThreadDesk/KiraBridge.
+There is no new work queue, executable HTML endpoint or automatic deployment.
 
 A design descriptor extends the existing `threaddesk.handoff.v1` at
 `context.design`; outer handoff/task/run identity and issuance remain governed by
 ThreadDesk/KiraBridge. No second work-order format replaces those contracts.
 The descriptor's own `format` is `blockdesigner.source.v1`. The prepared
-[JSON Schema](design-source-v1.schema.json) fixes shape/limits, not implementation.
-The initial proposal carries an inert PNG preview only; requested_style is
+[JSON Schema](design-source-v1.schema.json) fixes the descriptor shape/limits.
+The local implementation carries an inert PNG preview only; requested_style is
 bounded untrusted descriptive text, never executable CSS/code. Semantic checks
 (unique box IDs, exact source-element hash, unresolved→question) remain mandatory
-in the future adapter; structural schema validity alone never authorizes dispatch.
+in every later adapter; structural schema validity alone never authorizes dispatch.
 
 | Field | Meaning / Bedeutung |
 |---|---|
@@ -50,6 +51,15 @@ window size and display zoom are five separate concepts. The editor's existing
 responsive breakpoints or mobile stacking. Those target relationships must be
 explicit in each design request; no new global responsive rule is introduced.
 
+The current importer accepts an explicitly declared reference viewport and checks
+its aspect ratio against actual PNG dimensions. It does not infer a verified CSS
+viewport from image pixels (e.g. HiDPI). The background is uniformly fit from0/0
+with `scale=min(document.width/viewport.width, document.height/viewport.height)`;
+remaining canvas space stays empty. Existing zoom is applied over that document.
+Viewport declarations and the PNG/HTML relationship remain unverified claims;
+the image/source SHA256 values are computed over actual immutable uploaded bytes.
+`source_commit` is currently null, not a guessed Git commit.
+
 Before dispatch, bind project/snapshot/documentrevision/sourcehash/selection to
 the existing issued handoff. A changed source/revision is conflict, not a silent
 refresh. Same request identity repeats the existing task; uncertain delivery
@@ -57,9 +67,43 @@ reads it. Delivery/preview remains unverified until actual checks and explicit
 user decision. A later preview cannot overwrite a newer design. Missing source,
 commit, element mapping or image-consumption capability remains unknown.
 
-Current code has box model1, project/body format1, monotone revisions,
-existing Whiteboard task/snapshot/reply binding and preview decision. It does
-**not** yet persist/validate `context.design`, import HTML, map DOM elements or
-expose this via MCP. BD-C02–04 implement those pieces against this boundary;
-KiraBridge integration remains with the coordinator. See architecture.md for
-existing interfaces and README.md for the current actual start path.
+## Implemented local boundary
+
+Box/project/body format1, monotone revisions and existing CAS/snapshots are
+preserved. An optional document `design` stores source/preview metadata, a
+bounded static-ID catalog and box bindings; old documents have no reference.
+PNG/HTML bytes are deduplicated in the existing artifact store, checked by hash
+on save/read/history and never silently deleted. Missing/corrupt artifacts fail
+closed; recovery keeps historical data. Old Undo frames mean no background.
+Unknown future design versions are storageFormat, not corrupt-data fallback;
+an older writable snapshot cannot silently replace a newer unsupported format.
+
+POST `/api/design/import` accepts bounded base64 PNG plus optional UTF-8 HTML
+and reference_viewport. It only validates/parses text and publishes immutable
+artifacts under existing local project storage. GET
+`/api/design/preview/<sha256>` verifies and serves a PNG only. HTML has no serving,
+iframe, browser parsing, script, network, task or secret interface. Existing
+Host/Origin/CSP restrictions remain. PNG is RGB/RGBA8, noninterlaced/static,
+max1MiB/4Megapixels; HTML max256KiB and256 ID occurrences. Arbitrary paths/URLs
+are not accepted. No parser/PNG result is a functional test.
+
+`id:<exact HTML id>` identifies an occurrence in the static source, not an
+authenticated live DOM/component. Duplicate/inert-template/noscript IDs remain
+unresolved; visually similar labels are not identity. Runtime-created IDs and
+functionality are unverified. Box assignment uses current revision/hash and
+active-layer checks; new adds no original reference. Source changes leave old
+hashes stale. Viewport changes require explicit reassignment. Two boxes claiming
+the same original element produce a question. Moves/replacements only describe
+the desired code edit; no original pixels or code are modified here.
+
+`describeDesign(state, project_id, snapshot_id, requested_change)` prepares the
+existing descriptor and a separate read-only issues/transform wrapper.
+`ready` means reference mapping is resolved only; `execution_ready:false` and
+`execution_started:false` remain fixed. Stale/unresolved refs stay explicitly
+unresolved in the descriptor. Project/snapshot parameters are claims until the
+coordinator verifies the actual saved snapshot; no caller Boolean grants rights.
+This function is **not** an issued handoff, dispatch, MCP endpoint or return.
+
+Existing Whiteboard/Ollama box tasks are unchanged and do not receive original
+HTML or the new design descriptor. Full code-agent handoff/new-preview acceptance
+belongs to BD-C04 with the coordinator. See architecture.md and README.md.

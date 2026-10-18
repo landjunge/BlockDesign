@@ -23,6 +23,17 @@
     <aside id="myspace" class="side np-scroll" tabindex="0" aria-label="MySpace">
       <h2 data-i18n="myspace"></h2><p class="np-meta" data-i18n="myHint"></p><div id="retained"></div>
       <div id="projects-panel"></div><button id="history" class="np-button" data-i18n="history"></button><p id="storage-status" role="status" aria-live="polite" class="np-meta"></p>
+      <details class="np-disclosure" id="source-panel"><summary data-i18n="designImport"></summary>
+        <p class="np-meta" data-i18n="designImportHint"></p>
+        <form id="source-form">
+          <label class="np-field"><span data-i18n="designPng"></span><input id="source-png" type="file" accept="image/png,.png" required></label>
+          <label class="np-field"><span data-i18n="designHtml"></span><input id="source-html" type="file" accept="text/html,.html,.htm"></label>
+          <label class="np-field"><span data-i18n="designViewportWidth"></span><input id="source-width" type="number" min="1" max="32768" step="1" value="1000" required></label>
+          <label class="np-field"><span data-i18n="designViewportHeight"></span><input id="source-height" type="number" min="1" max="32768" step="1" value="640" required></label>
+          <button class="np-button" type="submit" data-i18n="designImport"></button>
+        </form>
+        <p id="source-info" role="status" class="np-meta source-info"></p>
+      </details>
     </aside>
     <section class="workspace" aria-label="Workspace">
       <div class="viewport" id="viewport">
@@ -44,6 +55,9 @@
         <label class="np-field"><span data-i18n="label"></span><textarea id="box-label" maxlength="4000"></textarea></label>
         <label class="np-field"><span data-i18n="parent"></span><select id="box-parent"></select></label>
         <div class="selection-actions"><button id="transfer" class="np-button" data-i18n="transfer"></button><button id="group" class="np-button" data-i18n="group"></button></div>
+        <label class="np-field"><span data-i18n="designAction"></span><select id="source-operation"><option value="new" data-i18n="designNew"></option><option value="move" data-i18n="designMove"></option><option value="replace" data-i18n="designReplace"></option></select></label>
+        <label class="np-field"><span data-i18n="designElement"></span><select id="source-element"></select></label>
+        <button id="source-bind" class="np-button" data-i18n="designBind"></button><p id="source-binding-state" role="status" class="np-meta"></p>
       </details>
       <details class="np-disclosure" id="attribute-panel"><summary data-i18n="attributeTitle"></summary>
         <div id="palette" role="group" aria-label="16 Grundfarben / 16 base colours"></div><p id="preview-info" role="status"></p>
