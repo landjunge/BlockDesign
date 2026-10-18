@@ -1,14 +1,13 @@
-#!/bin/zsh
+#!/bin/sh
 set -eu
-cd "${0:A:h}"
-bd_python=/usr/local/bin/python3.12
-if [[ ! -x "$bd_python" ]]; then
-  bd_python=/Users/landjunge/threaddesk/.venv/bin/python
+cd "$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+if [ -n "${BD_PYTHON:-}" ]; then
+  bd_python=$BD_PYTHON
+else
+  bd_python=$(command -v python3.12 || command -v python3 || true)
 fi
-if [[ "${1:-}" == "--setup" ]]; then
-  exec "$bd_python" scripts/host.py setup
+if [ -z "$bd_python" ] || [ ! -x "$bd_python" ]; then
+  echo 'Python 3.12 fehlt / Python 3.12 is required. Setze / set BD_PYTHON.' >&2
+  exit 2
 fi
-if [[ ! -f .runtime/binding.json ]]; then
-  "$bd_python" scripts/host.py setup
-fi
-exec "$bd_python" scripts/server.py "$@"
+exec "$bd_python" scripts/launch.py "$@"

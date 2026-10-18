@@ -117,3 +117,6 @@ dialog::backdrop { background: #0009; }
 .snapshot-canvas { position:absolute; top:0; left:0; transform-origin:top left; background:var(--np-surface); isolation:isolate; }
 .snapshot-canvas.structure { background-image:linear-gradient(to right,#edf0f41a 1px,transparent 1px),linear-gradient(to bottom,#edf0f41a 1px,transparent 1px); }
 #history-inspect pre { white-space:pre-wrap; overflow-wrap:anywhere; }
+
+/* Existing undo/redo actions, curved symbols with localized accessible names. */
+#undo, #redo { font-size: var(--np-title); }

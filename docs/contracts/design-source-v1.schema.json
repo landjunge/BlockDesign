@@ -1,0 +1,283 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Prepared BlockDesigner source descriptor; no active runtime importer",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "project_id",
+    "snapshot_id",
+    "document_revision",
+    "document_size",
+    "source",
+    "preview",
+    "view",
+    "elements",
+    "requested_change"
+  ],
+  "properties": {
+    "format": {
+      "const": "blockdesigner.source.v1"
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "snapshot_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "document_revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "document_size": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width",
+        "height"
+      ],
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32768
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32768
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_sha256",
+        "media_type",
+        "reference_viewport"
+      ],
+      "properties": {
+        "artifact_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "media_type": {
+          "enum": [
+            "text/html",
+            "image/png"
+          ]
+        },
+        "source_commit": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{40}([a-f0-9]{24})?$"
+        },
+        "reference_viewport": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "width",
+            "height"
+          ],
+          "properties": {
+            "width": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 32768
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 32768
+            }
+          }
+        }
+      }
+    },
+    "preview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_sha256",
+        "media_type",
+        "rendering_mode"
+      ],
+      "properties": {
+        "artifact_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "media_type": {
+          "const": "image/png"
+        },
+        "rendering_mode": {
+          "const": "inert-image"
+        }
+      }
+    },
+    "view": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "zoom"
+      ],
+      "properties": {
+        "zoom": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 16
+        }
+      }
+    },
+    "elements": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "box_id",
+          "action",
+          "source_element"
+        ],
+        "properties": {
+          "box_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "action": {
+            "enum": [
+              "move",
+              "replace",
+              "new"
+            ]
+          },
+          "source_element": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "artifact_sha256",
+                  "element_id",
+                  "resolution"
+                ],
+                "properties": {
+                  "artifact_sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "element_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "maxLength": 512
+                  },
+                  "resolution": {
+                    "enum": [
+                      "unique",
+                      "unresolved"
+                    ]
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "geometry": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "x": {
+                "type": "number",
+                "minimum": 0
+              },
+              "y": {
+                "type": "number",
+                "minimum": 0
+              },
+              "width": {
+                "type": "number",
+                "minimum": 4
+              },
+              "height": {
+                "type": "number",
+                "minimum": 4
+              }
+            }
+          },
+          "requested_style": {
+            "type": "string",
+            "maxLength": 4000
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "action": {
+                  "const": "new"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "source_element": {
+                  "type": "null"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "source_element": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "artifact_sha256",
+                    "element_id",
+                    "resolution"
+                  ],
+                  "properties": {
+                    "artifact_sha256": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "element_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "maxLength": 512
+                    },
+                    "resolution": {
+                      "enum": [
+                        "unique",
+                        "unresolved"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "requested_change": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10000
+    }
+  }
+}

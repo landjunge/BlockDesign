@@ -53,3 +53,23 @@ Technische Prüfung beweist keine fehlerfreie Sprachabsicht. Leere, falsche oder
 ## Gezielte Prüfwege
 
 `npm test`: Modell/Geometrie/atomare Aktionen/Familien/Undo. `tests/adapter_test.py`: Ziele, Ebenen, Werte, Kontext, Rückfragen und Antwortschema. `tests/host_contract_test.py`: eigene Manifestmigration ohne Umgehen deaktivierter Module. `tests/project_store_test.py`: deduplizierte Daten, Unterbrechung/Beschädigung, Konflikt, Format und Schreibfehler. `npm run browser`: vorhandene echte Modulregression. `npm run browser:upgrade`: eigene isolierte Chrome-/Hostablage, neue UI-/Historie-/Gesprächs-/Fehlerabläufe; Teilmenge über Fall-IDs möglich. `npm run browser:zoom`: echte Chrome-Einstellungen für 125/150/200 Prozent, keine CSS-Zoomsimulation. Neue Belege/Screenshots bleiben ignoriert unter `.runtime/`, öffentliche Berichte enthalten nur Prüfaussagen. Nach Moduländerung betroffene Fälle plus kurze durchgängige Regression ausführen.
+
+
+## Konsolidierter Einstieg · 18.10.2026
+
+Die vorhandene Produktbasis1357416 bleibt erhalten; der alte main-Prototyp ist
+kein alternativer Startweg. `start.command` wählt einen vorhandenen Interpreter
+(`BD_PYTHON` oder Python im PATH) und ruft `scripts/launch.py` auf. Dessen
+`--check` ist eine lesende Voraussetzungen-/Bindungsprüfung; Import und fehlende
+Konfiguration werden vor Setup/Serverstart verständlich eingeordnet. Vorhandene
+Bindung/Whiteboardroot und deaktivierte Modulentscheidung werden respektiert.
+Erst normaler Start beziehungsweise explizites `--setup` nutzt den vorhandenen
+Host-Setupweg; es entsteht keine neue Registrierungs-/Berechtigungsarchitektur.
+
+NP-Basis unverändert: Gitblob673f4e265c8c46618ba86d9e98f8da09fd0bf107,
+identisch mit aktueller lokaler TG/FP-Kopie. Bestehende Undo/Redo-Buttons nutzen
+gebogene Symbole mit lokalisierten zugänglichen Namen, keine neue Aktionslogik.
+Editorfenster, Dokumentkoordinaten und Zielseiten-Referenzviewport bleiben getrennt.
+[Design-source v1](contracts/design-source-v1.md) ist der vorbereitete Vertrag für
+BD-C02–04, noch kein Import-/MCP-/Bridge-Adapter. Keine Änderung an Box-/Projekt-
+Format1, Revision, UndoFrames oder historischen Daten.

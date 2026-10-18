@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 
 PROJECT = Path(__file__).resolve().parents[1]
-SOURCE = Path(os.environ.get('BD_THREADDESK_SOURCE', '/Users/landjunge/threaddesk-worktrees/ordinal-lock/src'))
+SOURCE = Path(os.environ.get('BD_THREADDESK_SOURCE', str(Path.home()/'threaddesk-worktrees/ordinal-lock/src'))).expanduser()
 sys.path.insert(0, str(SOURCE))
 from threaddesk.services.modules import ModuleManifest, ModuleRegistry, ModuleRuntime
 from threaddesk.services.actors import ActorRegistry
@@ -52,10 +52,13 @@ def setup():
     registry = ModuleRegistry(store)
     manifest = ModuleManifest.from_dict(json.loads((PROJECT/'module.json').read_text()))
     try: installed = registry.get(manifest.id)
-    except NotFound: installed = registry.install(manifest)
+    except NotFound:
+        installed = registry.install(manifest)
+        registry.set_enabled(manifest.id, True)
     if installed.manifest.to_dict()!=manifest.to_dict():
         registry.update(manifest)
-    registry.set_enabled(manifest.id, True)
+    if not registry.get(manifest.id).enabled:
+        raise RuntimeError('Modul ist deaktiviert / module disabled; bestehende Modulfreigabe explizit ändern, Setup reaktiviert sie nicht.')
     binding = PROJECT/'.runtime/binding.json'
     binding.parent.mkdir(exist_ok=True)
     if not binding.exists():
