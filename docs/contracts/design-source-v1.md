@@ -75,6 +75,8 @@ bounded static-ID catalog and box bindings; old documents have no reference.
 PNG/HTML bytes are deduplicated in the existing artifact store, checked by hash
 on save/read/history and never silently deleted. Missing/corrupt artifacts fail
 closed; recovery keeps historical data. Old Undo frames mean no background.
+Unknown future design versions are storageFormat, not corrupt-data fallback;
+an older writable snapshot cannot silently replace a newer unsupported format.
 
 POST `/api/design/import` accepts bounded base64 PNG plus optional UTF-8 HTML
 and reference_viewport. It only validates/parses text and publishes immutable

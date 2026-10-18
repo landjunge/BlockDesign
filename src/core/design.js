@@ -5,6 +5,7 @@ const keys = (value, expected) => plain(value) && Object.keys(value).sort().join
 function require(ok, code = 'designInvalidSource') { if (!ok) throw Error(code); }
 export function validateDesign(design, boxes) {
   if (design == null) return;
+  if (plain(design) && Number.isInteger(design.version) && design.version > 1) throw Error('storageFormat');
   require(keys(design, ['version', 'source', 'preview', 'catalog', 'bindings']) && design.version === 1);
   const source = design.source, preview = design.preview;
   require(keys(source, ['artifact_sha256', 'media_type', 'source_commit', 'reference_viewport']) && hash(source.artifact_sha256) && ['text/html', 'image/png'].includes(source.media_type) && source.source_commit === null);

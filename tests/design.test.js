@@ -73,6 +73,8 @@ test('locked layers and malformed design metadata cannot mutate state', () => {
   const forged = source('a'.repeat(64)); forged.preview.artifact_sha256 = '../../state';
   assert.equal(store.dispatch({ type: 'designImport', design: forged, expected_revision: store.getState().revision }).ok, false);
   assert.equal(store.getState().design.preview.artifact_sha256, 'b'.repeat(64));
+  const future = source('a'.repeat(64)); future.version = 2;
+  assert.equal(store.dispatch({ type:'designImport', design:future, expected_revision:store.getState().revision }).error, 'storageFormat');
   const old = initialState(); delete old.design; assert.equal(createStore(old).getState().design, undefined);
 });
 test('valid legacy box IDs cannot become prototype lookups; export bounds stay explicit', () => {

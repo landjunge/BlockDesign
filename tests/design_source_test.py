@@ -2,6 +2,7 @@
 
 import base64
 import hashlib
+import json
 import struct
 import sys
 import unittest
@@ -13,7 +14,7 @@ from uuid import uuid4
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from design_source import catalog, imported, png_size
-from project_store import ContractError, ProjectStore
+from project_store import ContractError, ProjectStore, encoded
 from project_store_test import body
 
 
@@ -163,6 +164,24 @@ class Reference(unittest.TestCase):
         self.assertRaises(
             ContractError, imported, self.image, self.html, {"width": True, "height": 1}
         )
+
+    def test_future_reference_format_never_falls_back_to_an_older_writable_head(self):
+        first = self.store.save(self.project, body(), {}, None)
+        document = body()
+        document["state"]["design"] = self.upload()
+        self.store.save(self.project, document, {}, first["head"])
+        commit_path = max((self.store.folder(self.project) / "commits").glob("*.json"))
+        record = json.loads(commit_path.read_bytes())
+        stored = self.store.read_blob(record["commit"]["chunks"]["document"])
+        stored["design"]["version"] = 2
+        record["commit"]["chunks"]["document"] = self.store.blob(stored)
+        record["sha256"] = hashlib.sha256(encoded(record["commit"])).hexdigest()
+        future_bytes = encoded(record)
+        commit_path.write_bytes(future_bytes)
+        with self.assertRaisesRegex(ContractError, "storageFormat"):
+            ProjectStore(self.store.root).read(self.project)
+        self.assertEqual(commit_path.read_bytes(), future_bytes)
+        self.assertEqual(len(list(commit_path.parent.glob("*.json"))), 2)
 
 
 if __name__ == "__main__":

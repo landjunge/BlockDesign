@@ -152,6 +152,12 @@ def decode_upload(value, limit):
 def validate_design(value, box_ids):
     if value is None:
         return
+    if (
+        isinstance(value, dict)
+        and type(value.get("version")) is int
+        and value["version"] > 1
+    ):
+        raise ContractError("storageFormat")
     require(
         isinstance(value, dict)
         and set(value) == {"version", "source", "preview", "catalog", "bindings"}
