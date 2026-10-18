@@ -12,6 +12,7 @@ from urllib.parse import urlparse, unquote
 from host import Host, PROJECT
 from ai_adapter import AIAdapter, ContractError
 from design_workflow import DesignWorkflow
+from workflow_profile import load_workflow_profile, WorkflowProfileError
 
 class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -136,8 +137,12 @@ class Handler(SimpleHTTPRequestHandler):
         # No request payloads or user instructions in console logs.
         sys.stderr.write(fmt % args + '\n')
 
-def main():
-    p=argparse.ArgumentParser();p.add_argument('--port',type=int,default=5190);a=p.parse_args()
+def main(argv=None):
+    p=argparse.ArgumentParser();p.add_argument('--port',type=int,default=5190)
+    p.add_argument('--workflow-profile', help='Private operator JSON or BD_WORKFLOW_PROFILE')
+    a=p.parse_args(argv)
+    try:workflow_profile=load_workflow_profile(a.workflow_profile)
+    except WorkflowProfileError as exc:p.exit(2,f'[{exc.code}] {exc}\n')
     server=ThreadingHTTPServer(('127.0.0.1',a.port),partial(Handler,directory=str(PROJECT)))
     server.host=Host()
     server.adapter=AIAdapter(server.host)
@@ -146,8 +151,9 @@ def main():
         server.host.context(lambda c:c.write_own_record('projects:write','project-storage',{'format':FORMAT,'root':str(project_root)}),'projects:write')
     else:server.host.context(lambda c:c.read_own_data(),'projects:write')
     server.projects=ProjectStore(project_root)
-    # A trusted embedding may supply a fixed client/profile. Browser requests cannot.
-    server.design_workflow=DesignWorkflow(server.projects)
+    # Only trusted startup may select the existing fixed client/profile.
+    # No browser input configures a peer, path, principal or credential.
+    server.design_workflow=DesignWorkflow(server.projects, *(workflow_profile or (None, None)))
     print(f'BlockDesigner bereit http://127.0.0.1:{server.server_port} · {server.host.thread_id}',flush=True)
     server.serve_forever()
 if __name__=='__main__':main()

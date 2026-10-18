@@ -1,0 +1,40 @@
+{
+  "scope": "isolated operator startup profile only; no model/provider/server/user runtime",
+  "base_commit": "eb3df8d1c556a8355ff28667d061e3e02d1a8670",
+  "sdk_source": "f19797b2e1b7e34b73de1180734a6b9c93ab07e5",
+  "sdk_behavior_base": "7af39cd97b58054d6e7333cd3430d00f4b46c3f4",
+  "threaddesk_source": "05403916e549e1060f839ccbaf36a5cb90413776",
+  "python": "3.12.13",
+  "mcp": "1.30.0",
+  "cryptography": "48.0.1",
+  "new_tests": {
+    "passed": 26,
+    "seconds": 1.52,
+    "only": "tests/workflow_profile_test.py"
+  },
+  "actual_start_check": {
+    "exit": 2,
+    "prerequisites_ready": true,
+    "workflow_profile_configured": true,
+    "binding_ready": false,
+    "setup_required": true,
+    "reason": "synthetic host binding intentionally absent",
+    "network_checked": false,
+    "dispatch_verified": false
+  },
+  "actual_start_negative": {
+    "exit": 2,
+    "code": "workflow_profile_file",
+    "cause": "synthetic profile0644",
+    "secrets_and_paths_in_diagnosis": false
+  },
+  "host_wiring": "actual main/parser with injected non-listening server+Host/Store; configured and default cases",
+  "writes_by_checker": false,
+  "shared_environment_changed": false,
+  "source_sha256": {
+    "scripts/launch.py": "4a6450afe58090a1e49fb2e3447e45aaaeea2173c4457d869c1041987adadbfa",
+    "scripts/server.py": "8095a3d3bff3f2d03e7a5814974f9165bd0a211f6bf26832bd63522a6c96dc63",
+    "scripts/workflow_profile.py": "bee6e155e9dfa5e04c3f625337e9754c9b15874949a561c99312c9a9929d624c",
+    "tests/workflow_profile_test.py": "f29ba75ec554f1b7dc1d9d82a4d2d1d850a6c9000a16fcb8570b40dfbe807b01"
+  }
+}

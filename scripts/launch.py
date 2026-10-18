@@ -10,11 +10,19 @@ import re
 import sys
 from pathlib import Path
 
+sys.dont_write_bytecode = True
+
+from workflow_profile import (
+    WorkflowProfileError,
+    load_workflow_profile,
+    selected_profile,
+)
+
 PROJECT = Path(__file__).resolve().parents[1]
 DEFAULT_SOURCE = Path.home() / "threaddesk-worktrees/ordinal-lock/src"
 
 
-def readiness():
+def readiness(workflow_profile=None):
     source = Path(
         os.environ.get("BD_THREADDESK_SOURCE", str(DEFAULT_SOURCE))
     ).expanduser()
@@ -111,6 +119,25 @@ def readiness():
                 "detail": "Existing binding must refer to a thread in BD_WHITEBOARD_ROOT; it will not be overwritten.",
             }
         )
+    workflow = {
+        "configured": False,
+        "network_checked": False,
+        "dispatch_verified": False,
+    }
+    if selected_profile(workflow_profile) is not None:
+        # Only local immutable prerequisites; no Bridge(), task, socket or setup.
+        try:
+            loaded = load_workflow_profile(workflow_profile)
+            workflow.update(configured=True, project_count=len(loaded[1]))
+            checks.append(
+                {
+                    "name": "workflow_profile",
+                    "ok": True,
+                    "detail": "Local fixed profile loaded; remote permissions/dispatch unverified.",
+                }
+            )
+        except WorkflowProfileError as exc:
+            checks.append({"name": exc.code, "ok": False, "detail": str(exc)})
     prerequisites = all(check["ok"] for check in checks)
     return {
         "product": "BlockDesigner",
@@ -119,6 +146,7 @@ def readiness():
         "binding_ready": binding_ready,
         "setup_required": not binding.exists(),
         "checks": checks,
+        "workflow_profile": workflow,
     }
 
 
@@ -138,10 +166,14 @@ def main(argv=None):
         help="Create/reuse the existing own module binding; never reactivate a disabled module",
     )
     parser.add_argument("--port", type=int, default=5190)
+    parser.add_argument(
+        "--workflow-profile",
+        help="Explicit private operator JSON; otherwise BD_WORKFLOW_PROFILE. Never browser-controlled.",
+    )
     args = parser.parse_args(argv)
     if not 0 <= args.port <= 65535:
         parser.error("port must be 0–65535")
-    report = readiness()
+    report = readiness(args.workflow_profile)
     if args.check:
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return 0 if report["prerequisites_ready"] and report["binding_ready"] else 2
@@ -164,8 +196,11 @@ def main(argv=None):
         setup()
     from server import main as serve
 
-    sys.argv = [sys.argv[0], "--port", str(args.port)]
-    serve()
+    server_args = ["--port", str(args.port)]
+    profile = selected_profile(args.workflow_profile)
+    if profile is not None:
+        server_args.extend(["--workflow-profile", profile])
+    serve(server_args)
     return 0
 
 
