@@ -219,3 +219,11 @@ are not loaded; template/noscript IDs remain unresolved. Functionality, dynamica
 created elements and automatic HTML rendering are outside this local import.
 Old documents remain readable; Undo/Redo/History preserve reference and mapping.
 [Checks and limits / Prüfung](docs/acceptance/IMPORT-20261018.md).
+
+### Legacy execution barrier / Historische Ausführungssperre
+
+Ungeklärte historische Task-/Run-/Return-/Antwortbelege behalten ihre lokale
+Startsperre auch ohne alten Startindex; fehlende Quellbelege werden nicht geraten.
+Reines Prepare/Issue behauptet weiterhin keine Ausführung. Unknown historical
+execution evidence retains its original local overlap barrier; prepare/issue alone
+still makes no execution claim. [Narrow follow-up evidence DE/EN](docs/acceptance/LEGACY-BARRIER-20261019.md).

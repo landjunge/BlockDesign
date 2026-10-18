@@ -24,6 +24,41 @@ def sha(raw):
     return hashlib.sha256(raw).hexdigest()
 
 
+def may_have_executed(value):
+    """Historical uncertainty is not erased by a missing operations.start map.
+
+    These are possible-execution claims, never verified starts or success. A pure
+    prepared/issued record without such claims does not imply code execution.
+    """
+    return (
+        "start" in value["operations"]
+        or any(key.startswith("answer_") for key in value["operations"])
+        or any(
+            value.get(key) not in (None, "")
+            for key in ("bridge_task_id", "run_id", "active_task_id", "return_id")
+        )
+        or value.get("state")
+        in {
+            "unknown",
+            "queued",
+            "accepted",
+            "running",
+            "completed",
+            "failed",
+            "blocked",
+            "cancelled",
+            "bound",
+            "agent_running",
+            "answer_dispatching",
+            "awaiting_answer",
+            "delivering",
+            "delivered_unverified",
+            "rejected",
+            "rework",
+        }
+    )
+
+
 def descriptor(saved, instruction):
     state = saved["body"]["state"]
     require(saved["head"] == saved["snapshot"]["id"], "designStale")
@@ -421,7 +456,7 @@ class DesignWorkflow:
                 if (
                     (previous["project_id"], previous["id"])
                     == (value["project_id"], value["id"])
-                    or "start" not in previous["operations"]
+                    or not may_have_executed(previous)
                     or previous.get("decision") in {"accepted", "rejected", "rework"}
                 ):
                     continue
