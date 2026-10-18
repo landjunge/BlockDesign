@@ -1,0 +1,32 @@
+{
+  "version": "0.1.0",
+  "release_tag": "v0.1.0",
+  "tested_product_commit": "df2550390af3cd6c77b79cc5911d7c8c0b9e4d0f",
+  "verified_remote_before_delivery_record": "4de890a7fd67bc5811cfc5177f3c0e9a3dd8a932",
+  "remote": "landjunge/blockdesign",
+  "branch": "feat/modular-block-designer",
+  "whiteboard_thread": "2e1032dcf420",
+  "completion_entry": "439ea0247092",
+  "task_id": "bd-08",
+  "step_id": "BD-08.2",
+  "completed_packages": 8,
+  "completed_steps": 16,
+  "progress_percent": 100,
+  "checks": {
+    "core": 13,
+    "adapter": 8,
+    "browser": 11,
+    "native_zoom": 3,
+    "failed_required": 0
+  },
+  "concept_sync": {
+    "concept_commit": "b0f0b647daac44986d658c21a9d6bcc6571144bd",
+    "verified_at": "2026-10-14T16:15:52.345000+00:00",
+    "hashes": {
+      "BD Ziel Idee.md": "cf67c4bc594b2f89147899805b93042bfd473205e6d0dcfbf564c80a4d17c13a",
+      "BD Brainstorm Destillat.md": "a8557fb6a210c8be4905e8db86af86070cd352493a9072c2fa8e4a58a7c3cea9",
+      "BD Pre-Plan.md": "93e6fc9dbd6f2b6b1db52ae034886da5d72610b65b04f525030d627d415326f0"
+    }
+  },
+  "recorded_at": "2026-10-14T16:19:01.754570+00:00"
+}

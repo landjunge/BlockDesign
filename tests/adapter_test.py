@@ -1,0 +1,67 @@
+"""Trust-boundary tests with explicit synthetic JSON, no simulated AI success."""
+import copy
+import json
+from pathlib import Path
+import sys
+import unittest
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
+from ai_adapter import response_schema, intent_messages, messages, ContractError, validate_request, validate_reply, validate_snapshot
+
+BOX={'id':'synthetic-box-1','number':1,'orientation':'hsl(137.508 80% 76%)','layer':1,'type':'Box','x':475,'y':295,'width':50,'height':50,'radius':0,'color':'#ffffff','paletteIndex':4,'brightness':0,'borderColor':'#808080','borderWidth':1,'font':{'family':'system-ui','size':14,'color':'#000000'},'label':'','parentId':None}
+SNAPSHOT={'version':1,'revision':4,'document':{'width':1000,'height':640},'boxes':[BOX],'selection':[BOX['id']],'activeLayer':1,'grid':{'spacing':20,'magnet':2,'enabled':True},'coordinates':{'origin':[0,0],'x':'right','y':'down','unit':'px','pixel_scale':1},'zoom':.75,'language':'de'}
+PACKET={'task_id':'synthetic-task','instruction':'Beschrifte die Box','box_ids':[BOX['id']],'revision':4,'snapshot':SNAPSHOT}
+def raw(changes=None):return {'summary':'Synthetic validator fixture','actions':[{'type':'patch','box_id':BOX['id'],'changes':changes or {'label':'Weiter'}}],'proposals':[]}
+class AdapterSafety(unittest.TestCase):
+ def setUp(self):self.packet=copy.deepcopy(PACKET)
+ def reject(self,data):
+  with self.assertRaises((ContractError,ValueError,TypeError)):validate_reply(data,self.packet)
+ def test_real_request_contract(self):
+  self.assertEqual(validate_request(self.packet),self.packet)
+  self.assertEqual(validate_reply(raw(),self.packet)['revision'],4)
+ def test_unknown_or_locked_targets(self):
+  data=raw();data['actions'][0]['box_id']='foreign-box';self.reject(data)
+  self.packet['snapshot']['activeLayer']=2
+  with self.assertRaises(ContractError):validate_request(self.packet)
+ def test_identity_code_css_and_nonfinite_rejected(self):
+  for changes in [{'id':'forbidden'},{'number':9},{'orientation':'#ff0000'},{'layer':3},{'parentId':None},{'onclick':'execute code'},{'color':'url(https://x.invalid)'},{'x':float('nan')},{'width':True}]:self.reject(raw(changes))
+ def test_dimensions_font_and_grid_limits(self):
+  for changes in [{'width':3},{'height':-1},{'x':999},{'y':639},{'radius':-1},{'brightness':101},{'borderWidth':21},{'font':{'family':'url(evil)','size':14,'color':'#000000'}}]:self.reject(raw(changes))
+  for spacing,magnet in [(0,0),(10,8),(-5,1),(float('inf'),2)]:self.reject({'summary':'fixture','actions':[{'type':'grid','spacing':spacing,'magnet':magnet}],'proposals':[]})
+ def test_parent_cycle_and_moving_children_bounds(self):
+  module=copy.deepcopy(BOX);module.update(id='module-1',number=2,type='Modul',x=470,y=290,width=60,height=60)
+  self.packet['snapshot']['boxes'].append(module);self.packet['snapshot']['boxes'][0]['parentId']=module['id'];self.packet['box_ids']=['module-1'];self.packet['snapshot']['selection']=['module-1']
+  data=raw({'x':950});data['actions'][0]['box_id']='module-1';self.reject(data)
+  module['parentId']=module['id']
+  with self.assertRaises(ContractError):validate_snapshot(self.packet['snapshot'])
+ def test_proposals_have_no_positions_or_executable_values(self):
+  data={'summary':'fixture','actions':[],'proposals':[{'title':'Blue','description':'fixture','changes':{'color':'#42a5f5','radius':8}}]}
+  reply=validate_reply(data,self.packet);self.assertEqual(reply['proposals'][0]['source_task'],self.packet['task_id'])
+  data['proposals'][0]['changes']['x']=10;self.reject(data)
+ def test_packet_revision_targets_coordinate_contract_and_context_bound(self):
+  for change in ['revision','box_ids','coordinates','context']:
+   packet=copy.deepcopy(self.packet)
+   if change=='revision':packet['revision']=3
+   elif change=='box_ids':packet['box_ids']=[]
+   elif change=='coordinates':packet['snapshot']['coordinates']['x']='left'
+   else:packet['snapshot']['boxes'][0]['label']='large'*4000
+   with self.assertRaises(ContractError):validate_request(packet)
+ def test_reply_extra_fields_wrong_structure_and_large_values(self):
+  data=raw();data['code']='arbitrary';self.reject(data)
+  self.reject('not JSON');self.reject(raw({'label':'x'*4001}))
+class ConversationSafety(unittest.TestCase):
+ def test_question_has_no_actions_or_proposals(self):
+  p=copy.deepcopy(PACKET);reply=validate_reply({'summary':'Need context','actions':[],'proposals':[],'question':'Which box?'},p);self.assertEqual(reply['question'],'Which box?')
+  with self.assertRaises(ContractError):validate_reply({'summary':'Contradiction','actions':[{'type':'patch','box_id':p['box_ids'][0],'changes':{'label':'bad'}}],'proposals':[],'question':'Which box?'},p)
+ def test_discarded_changes_are_context_not_applied_history(self):
+  p=copy.deepcopy(PACKET);p['conversation']={'turns':[{'task_id':'old','instruction':'Change width','summary':'Proposed width','question':'','box_ids':p['box_ids'],'status':'discarded','actions':raw({'width':180})['actions'],'proposals':[]}]}
+  history=json.loads(messages(p,'edit')[2]['content']);self.assertEqual(history['applied_actions'],[]);self.assertEqual(history['unapplied_actions'][0]['changes']['width'],180);self.assertIn('CURRENT DOCUMENT DATA',messages(p,'edit')[-1]['content'])
+ def test_intent_specific_answer_cannot_mix_edits_with_proposals(self):
+  p=copy.deepcopy(PACKET);data=raw();data.update(kind='edit',question='');data['proposals']=[{'title':'unrequested','description':'fixture','changes':{'color':'#ffffff'}}]
+  with self.assertRaises(ContractError):validate_reply(data,p)
+  schema=response_schema(p,'proposal');self.assertEqual(schema['properties']['actions']['maxItems'],0);self.assertEqual(schema['properties']['kind']['const'],'proposal');self.assertEqual(intent_messages(p)[-1]['role'],'user')
+ def test_conversation_version_and_current_selection_binding(self):
+  p=copy.deepcopy(PACKET);p['conversation']={'version':1,'project_id':'project-1','snapshot_id':'snapshot-1','parent_task_id':None,'selection_changed':False,'turns':[]};validate_request(p)
+  p['conversation']['version']=99
+  with self.assertRaises(ContractError):validate_request(p)
+
+if __name__=='__main__':unittest.main(verbosity=2)

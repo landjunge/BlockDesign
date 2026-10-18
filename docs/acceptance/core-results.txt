@@ -1,0 +1,21 @@
+✔ creation, layer locks, offsets, identity and exhausted creation space (66.260361ms)
+✔ nearest centre ignores overlap area, locked layers and ties use number (2.431117ms)
+✔ movement snaps edges and hard boundaries; D/F lock orthogonal axis and anchor (3.149309ms)
+✔ proportional scale respects minimum and both hard limits without ratio drift (43.172479ms)
+✔ ordered shift selection transfers text and suitable style but preserves identity and position (2.049536ms)
+✔ nested modules move as a family, prevent cycles and keep children unscaled (3.328609ms)
+✔ atomic rejection cannot mutate a partial T batch or accept unknown attributes (13.824455ms)
+✔ grid validates values, refinement and view/zoom leave document coordinates intact (8.899405ms)
+✔ preview is transient; cancel restores original and commit increments revision once (6.203837ms)
+✔ AI batches bind task, target, revision; invalid duplicate stale returns never change boxes (5.692779ms)
+✔ grab a non-primary selected box: monitor follows it and retains exact values after drop (2.417956ms)
+✔ module background passes to children while geometry, label and identity stay; untouched A makes no edit (3.950811ms)
+✔ partial font edits validate known fields and preserve all unrequested font attributes (1.36385ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1124.876695

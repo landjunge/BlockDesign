@@ -1,0 +1,58 @@
+{
+  "task_id": "77452092-7622-44ef-97dc-09101602acd3",
+  "box_ids": [
+    "b0a0d938-31e0-44ce-82b4-9fbf0652f557"
+  ],
+  "revision": 1,
+  "activeLayer": 1,
+  "instruction": "Zeige mir zwei unterschiedliche Gestaltungsvorschläge für diese Box als Button. Einer blau, einer orange. Noch nicht anwenden.",
+  "status": "ready",
+  "applied": false,
+  "received": true,
+  "reply": {
+    "version": 1,
+    "task_id": "77452092-7622-44ef-97dc-09101602acd3",
+    "revision": 1,
+    "box_ids": [
+      "b0a0d938-31e0-44ce-82b4-9fbf0652f557"
+    ],
+    "summary": "Zwei verschiedene Button-Designvorschläge",
+    "actions": [],
+    "proposals": [
+      {
+        "title": "Blauer Button",
+        "description": "Ein blauer Button mit einer hellen Schrift",
+        "changes": {
+          "color": "#0000ff",
+          "borderColor": "#0000ff",
+          "borderWidth": 1,
+          "brightness": 0
+        },
+        "id": "9dc6c855-b16c-48d3-9daa-5cff1ba16f75",
+        "source_task": "77452092-7622-44ef-97dc-09101602acd3"
+      },
+      {
+        "title": "Oranger Button",
+        "description": "Ein oranger Button mit einer dunklen Schrift",
+        "changes": {
+          "color": "#ffa500",
+          "borderColor": "#ffa500",
+          "borderWidth": 1,
+          "brightness": 0
+        },
+        "id": "b88fffd5-6852-4e52-add1-0846463bcd3f",
+        "source_task": "77452092-7622-44ef-97dc-09101602acd3"
+      }
+    ]
+  },
+  "evidence": {
+    "model": "llama3.2:3b",
+    "response_sha256": "fac9ca542c6cbbfa3824cab61abfb8f31bd983234948f24fb104b2a2268be3f8",
+    "metrics": {
+      "model": "llama3.2:3b",
+      "eval_count": 139,
+      "prompt_eval_count": 602,
+      "total_duration": 46598226918
+    }
+  }
+}

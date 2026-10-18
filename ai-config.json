@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "model": "llama3.2:3b",
+  "reason": "Kleinste vorhandene Variante mit nachgewiesenen lokalen Änderungen und Gestaltungsvorschlägen. 1b unzureichend; qwen2:7b ohne Qualitätsgewinn und deutlich langsamer. 3b nutzt im selben Whiteboard-Auftrag eine begrenzte lokale Absichtserkennung und anschließend die passende exklusive Antwortform, getrennte Gesprächsrollen und unabhängige Aktionsvalidierung. Keine globalen Änderungen oder externen Kosten."
+}
