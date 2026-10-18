@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 import stat
+import time
 from copy import deepcopy
 from pathlib import Path
 from threading import Lock
@@ -102,6 +103,22 @@ class FixedBridgeClient:
 
         self.peer = peer(config, principal)
         self.principal = principal
+        self.config_ref = config._source_sha256
+        self.state_root_ref = sha(str(config.state_path.resolve()).encode())
+
+    def profile_identity(self):
+        # Configuration observed by this fixed local client, not a remote/OS
+        # attestation. Authentication and actual task principal are checked by MCP.
+        # Deliberately exclude the peer token and credential-file contents.
+        return {
+            "kind": "kirabridge-local-mcp",
+            "peer_id": self.peer.id,
+            "endpoint_ref": sha(self.peer.url.encode()),
+            "principal": self.principal,
+            "config_ref": self.config_ref,
+            "state_root_ref": self.state_root_ref,
+            "identity_scope": "configured_local_peer_not_remote_attestation",
+        }
 
     async def call(self, name, arguments):
         from kirabridge.mcp_gateway.client import MCPClientPool
@@ -164,13 +181,22 @@ class DesignWorkflow:
         atomic(self.folder(value["project_id"]) / (value["id"] + ".json"), raw)
 
     def public(self, value):
+        drift = False
+        if value.get("operator_profile") or value["operations"]:
+            try:
+                self.check_operator_profile(value)
+            except Exception:
+                drift = True
         return {
             k: deepcopy(v)
             for k, v in value.items()
-            if k not in {"operations", "issued", "descriptor", "files"}
+            if k
+            not in {"operations", "issued", "descriptor", "files", "operator_profile"}
         } | {
             "client_available": self.client is not None
-            and value["project_id"] in self.profiles,
+            and value["project_id"] in self.profiles
+            and not drift,
+            "profile_drift": drift,
             "project_completion_verified": False,
             "source_commit_verified": False,
             "automatic_retry": False,
@@ -253,31 +279,178 @@ class DesignWorkflow:
             finally:
                 os.close(fd)
 
+    def operator_profile(self, project):
+        require(
+            self.client is not None and project in self.profiles,
+            "designProfileUnavailable",
+        )
+        profile = deepcopy(self.profiles[project])
+        require(
+            isinstance(profile, dict)
+            and set(profile) == {"cwd", "source_file", "preview_file"},
+            "designProfileUnavailable",
+        )
+        root = Path(profile["cwd"])
+        canonical = root.resolve(strict=True)
+        require(
+            root.is_absolute() and root.absolute() == canonical,
+            "designProfileUnavailable",
+        )
+        info = canonical.stat(follow_symlinks=False)
+        require(stat.S_ISDIR(info.st_mode), "designProfileUnavailable")
+        for key in ["source_file", "preview_file"]:
+            name = profile[key]
+            require(
+                isinstance(name, str)
+                and 0 < len(name) <= 255
+                and Path(name).name == name
+                and name not in {".", ".."},
+                "designProfileUnavailable",
+            )
+        require(
+            profile["source_file"] != profile["preview_file"],
+            "designProfileUnavailable",
+        )
+        identify = getattr(self.client, "profile_identity", None)
+        require(callable(identify), "designProfileUnavailable")
+        backend = identify()
+        require(
+            isinstance(backend, dict)
+            and set(backend)
+            == {
+                "kind",
+                "peer_id",
+                "endpoint_ref",
+                "principal",
+                "config_ref",
+                "state_root_ref",
+                "identity_scope",
+            }
+            and backend["kind"] == "kirabridge-local-mcp"
+            and backend["identity_scope"]
+            == "configured_local_peer_not_remote_attestation"
+            and backend["principal"] == self.client.principal
+            and all(
+                isinstance(backend[k], str) and 0 < len(backend[k]) <= 128
+                for k in ["peer_id", "principal"]
+            )
+            and all(
+                isinstance(backend[k], str)
+                and len(backend[k]) == 64
+                and all(c in "0123456789abcdef" for c in backend[k])
+                for k in ["endpoint_ref", "state_root_ref"]
+            )
+            and (
+                backend["config_ref"] is None
+                or isinstance(backend["config_ref"], str)
+                and len(backend["config_ref"]) == 64
+                and all(c in "0123456789abcdef" for c in backend["config_ref"])
+            ),
+            "designProfileUnavailable",
+        )
+        return {
+            "format": "blockdesigner.operator-profile.v1",
+            "cwd": str(canonical),
+            "cwd_device": info.st_dev,
+            "cwd_inode": info.st_ino,
+            "source_file": profile["source_file"],
+            "preview_file": profile["preview_file"],
+            "backend": deepcopy(backend),
+        }
+
+    def check_operator_profile(self, value, *, bind=False):
+        current = self.operator_profile(value["project_id"])
+        pinned = value.get("operator_profile")
+        if pinned is None:
+            # Never infer a historical source/backend from current configuration.
+            require(
+                bind
+                and not value["operations"]
+                and value.get("state") == "prepared"
+                and not any(
+                    key in value
+                    for key in [
+                        "issued",
+                        "handoff_id",
+                        "bridge_task_id",
+                        "run_id",
+                        "return_id",
+                        "decision",
+                    ]
+                ),
+                "designProfileChanged",
+            )
+            value["operator_profile"] = deepcopy(current)
+            value["operator_profile_sha256"] = sha(encoded(current))
+            self.save(value)
+        else:
+            require(
+                value.get("operator_profile_sha256") == sha(encoded(pinned))
+                and pinned == current,
+                "designProfileChanged",
+            )
+        return deepcopy(value["operator_profile"])
+
     def guard_start(self, value, profile):
         """Share this store's barrier across designs mapped to one source project.
 
         Not OS-wide locking against unrelated programs or independent stores.
         """
-        source_project = Path(profile["cwd"]).resolve(strict=True)
-        for project, configured in self.profiles.items():
-            if Path(configured["cwd"]).resolve() != source_project:
+        current = self.check_operator_profile(value)
+        scanned, scan_bytes = 0, 0
+        deadline = time.monotonic() + 2
+        # The profiles may have been deleted/remapped. Persisted ORIGINAL binding
+        # remains the authority for overlap; no current profile is needed for it.
+        for folder in (self.projects.root / "projects").iterdir():
+            scanned += 1
+            require(
+                scanned <= 4096 and time.monotonic() < deadline, "designWorkflowLimit"
+            )
+            if not UUID.fullmatch(folder.name) or not folder.is_dir():
                 continue
-            for path in self.folder(project).glob("*.json"):
-                previous = self.load(project, path.stem)
+            for path in (folder / "design-workflows").glob("*.json"):
+                scanned += 1
+                scan_bytes += path.lstat().st_size
                 require(
+                    scanned <= 4096
+                    and scan_bytes <= 16777216
+                    and time.monotonic() < deadline,
+                    "designWorkflowLimit",
+                )
+                previous = self.load(folder.name, path.stem)
+                if (
                     (previous["project_id"], previous["id"])
                     == (value["project_id"], value["id"])
                     or "start" not in previous["operations"]
-                    or previous.get("decision") in {"accepted", "rejected", "rework"},
+                    or previous.get("decision") in {"accepted", "rejected", "rework"}
+                ):
+                    continue
+                original = previous.get("operator_profile")
+                require(
+                    isinstance(original, dict)
+                    and previous.get("operator_profile_sha256")
+                    == sha(encoded(original))
+                    and original.get("format") == "blockdesigner.operator-profile.v1"
+                    and isinstance(original.get("cwd"), str)
+                    and type(original.get("cwd_device")) is int
+                    and type(original.get("cwd_inode")) is int,
+                    "designBusy",
+                )
+                require(
+                    original["cwd"] != current["cwd"]
+                    and (original["cwd_device"], original["cwd_inode"])
+                    != (current["cwd_device"], current["cwd_inode"]),
                     "designBusy",
                 )
 
     async def operation(self, value, key, operation, arguments, wait=True):
+        self.check_operator_profile(value)
+        client = self.client
         request_hash = sha(encoded([operation, arguments]))
         existing = value["operations"].get(key)
         if existing:
             require(existing["request_hash"] == request_hash, "taskConflict")
-            task = await self.client.task(existing["task_id"])
+            task = await client.task(existing["task_id"])
         else:
             require(len(value["operations"]) < 128, "designWorkflowLimit")
             task_id = "bd_" + sha(encoded([value["project_id"], value["id"], key]))[:48]
@@ -290,7 +463,7 @@ class DesignWorkflow:
                 value.update(bridge_task_id=task_id, state="unknown")
             # Durable identity BEFORE sending. On loss only task_get, never submit again.
             self.save(value)
-            task = await self.client.submit(
+            task = await client.submit(
                 {
                     "task_id": task_id,
                     "idempotency_key": task_id,
@@ -305,12 +478,14 @@ class DesignWorkflow:
             and task.get("principal") == self.client.principal,
             "taskConflict",
         )
+        self.check_operator_profile(value)
         if wait:
             for _ in range(40):
                 if task["state"] not in {"queued", "accepted", "running"}:
                     break
                 await asyncio.sleep(0.05)
-                task = await self.client.task(task["id"])
+                task = await client.task(task["id"])
+                self.check_operator_profile(value)
                 require(
                     task.get("id") == value["operations"][key]["task_id"]
                     and task.get("operation") == operation
@@ -364,9 +539,10 @@ class DesignWorkflow:
                 self.client is not None and project in self.profiles,
                 "designProfileUnavailable",
             )
-            profile = self.profiles[project]
             self.current(value)
             try:
+                pinned = self.check_operator_profile(value, bind=action == "issue")
+                profile = {k: pinned[k] for k in ["cwd", "source_file", "preview_file"]}
                 async with asyncio.timeout(30):
                     await self.perform(value, profile, action, data or {})
             except Exception as error:
@@ -384,6 +560,7 @@ class DesignWorkflow:
             return self.public(value)
 
     async def perform(self, value, profile, action, data):
+        self.check_operator_profile(value)
         require(
             action in {"issue", "start", "refresh", "answer", "decision"},
             "invalidAction",
@@ -546,9 +723,11 @@ class DesignWorkflow:
             value["active_task_id"] = task["id"]
             value["state"] = task["state"]
             return
+        self.check_operator_profile(value)
         active = await self.client.task(
             value.get("active_task_id") or value["bridge_task_id"]
         )
+        self.check_operator_profile(value)
         require(
             active["id"] == (value.get("active_task_id") or value["bridge_task_id"])
             and active["principal"] == self.client.principal,
@@ -579,7 +758,9 @@ class DesignWorkflow:
         value["run_id"] = observed["run_id"]
         value["session_id"] = observed["session_id"]
         if observed["phase"] == "awaiting_answer":
+            self.check_operator_profile(value)
             task = await self.client.task(observed["last_task_id"])
+            self.check_operator_profile(value)
             answer = task["result"]["value"]
             require(answer["question_id"] == observed["question_id"], "taskConflict")
             value["question_id"] = observed["question_id"]
@@ -621,10 +802,12 @@ class DesignWorkflow:
             {profile["source_file"], profile["preview_file"]} <= set(reply["files"]),
             "designReturnUnverified",
         )
+        self.check_operator_profile(value)
         original = self.fixed_file(profile, "source_file", MAX_HTML)
         preview = self.fixed_file(profile, "preview_file", MAX_PNG)
         png_size(preview)
         self.current(value)
+        self.check_operator_profile(value)
         hashes = {"source_sha256": sha(original), "preview_sha256": sha(preview)}
         if "returned" in value:
             require(

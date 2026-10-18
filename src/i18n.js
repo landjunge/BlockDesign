@@ -113,6 +113,8 @@ Object.assign(en, {
 // Bridge transport acceptance and the later workflow decision are separate.
 de.codeDecisionAccepted='Betreiberentscheidung angenommen · kein Funktionstest';
 en.codeDecisionAccepted='Operator accepted delivery · not a functional test';
+de.designProfileChanged='Ursprüngliches Betreiberprofil geändert oder nicht mehr belegbar. Keine neue Datei zuordnen; vorhandenen Bridge-Auftrag unabhängig lesen und Originalbindung klären.';
+en.designProfileChanged='Original operator profile changed or cannot be established. No new file is associated; read the existing Bridge task independently and resolve its original binding.';
 export const t = (lang, key, args = {}) => Object.entries(args).reduce((v, [k, value]) => v.replaceAll(`{${k}}`, String(value)), (lang === 'en' ? en : de)[key] || key);
 export function translate(root, lang) {
   root.querySelectorAll('[data-i18n]').forEach(e => { e.textContent = t(lang, e.dataset.i18n); });

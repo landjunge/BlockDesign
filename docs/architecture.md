@@ -104,6 +104,25 @@ prüfen; der lokale Descriptor und sein `ready`-Flag sind keine Berechtigung.
 
 ## Codeübergabe / BD-C04 · 18.10.2026
 
+Reviewkorrektur19.10.: `blockdesigner.operator-profile.v1` pinnt vor dem ersten
+Versand kanonisches CWD samt beobachteter Verzeichnisidentität, feste Quell-/PNG-
+Dateinamen sowie konfigurierte Peer-/Principal-/Konfig-/State-Referenzen. Keine
+Tokens oder Credentialinhalte; diese Clientbeobachtung ist keine Remoteattestierung.
+Jede Folgeaktion und jeder ausgehende Clientcall prüft den bestehenden Pin; vor
+Dateiübernahme nochmals nach RPC. Drift verweigert bereits die erste Rückvorschau
+und Entscheidung. Die Aktion nutzt eine Kopie des ursprünglichen Pins, keine
+zwischenzeitlich umkonfigurierte Dateizuordnung. Der Browser sieht nur den Hash
+und einen lokalisierten Sperrstatus, keine internen Pfade/Backenddaten.
+
+Die Startsperre liest alle persistierten eigenen Zuordnungen, unabhängig von der
+heutigen Profilliste. Ursprünglicher kanonischer Pfad oder beobachtetes dev/inode
+eines ungeklärten Starts sperren dasselbe Quellprojekt auch nach Profilentfernung,
+Umordnung oder Verzeichnisumbenennung. Fehlende historische Pins werden nicht
+geraten und blockieren konservativ; keine automatische Migration/Löschung.
+Maximal4096 Einträge/16MiB und zwischen Dateiprüfungen ein2s-Scanbudget, sonst
+failclosed. Das ist keine OS-weite Sperre oder harte Echtzeitgarantie für langsame
+Dateisysteme. [Gezielte Gegenfälle](acceptance/PROFILE-PIN-20261019.md).
+
 `scripts/design_workflow.py` erzeugt serverseitig aus einem tatsächlichen aktuellen
 Projekt/Snapshot einen unveränderlichen Descriptor im vorhandenen CAS. Der optionale
 `FixedBridgeClient` verwendet vorhandene KiraBridge-MCP-Werkzeuge; seine lokale

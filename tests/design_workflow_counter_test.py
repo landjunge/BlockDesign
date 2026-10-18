@@ -1,8 +1,31 @@
 """Small new rejection paths, no model/network/runtime startup."""
 
+from types import SimpleNamespace
+
 import pytest
 from design_workflow_test import prepared
 from project_store import ContractError
+
+
+def fixed_identity(principal="local"):
+    return {
+        "kind": "kirabridge-local-mcp",
+        "peer_id": "synthetic-peer",
+        "endpoint_ref": "a" * 64,
+        "principal": principal,
+        "config_ref": None,
+        "state_root_ref": "b" * 64,
+        "identity_scope": "configured_local_peer_not_remote_attestation",
+    }
+
+
+def bind(workflow, record, tmp_path):
+    workflow.profiles[record["project_id"]] = {
+        "cwd": tmp_path,
+        "source_file": "own.html",
+        "preview_file": "own.png",
+    }
+    workflow.check_operator_profile(record, bind=True)
 
 
 @pytest.mark.asyncio
@@ -13,6 +36,9 @@ async def test_foreign_task_receipt_is_not_accepted(tmp_path, mismatch):
 
     class Client:
         principal = "local"
+
+        def profile_identity(self):
+            return fixed_identity(self.principal)
 
         async def submit(self, packet):
             task = {
@@ -26,6 +52,7 @@ async def test_foreign_task_receipt_is_not_accepted(tmp_path, mismatch):
             return task
 
     workflow.client = Client()
+    bind(workflow, record, tmp_path)
     with pytest.raises(ContractError, match="taskConflict"):
         await workflow.operation(
             record, "start", "handoff.start", {"handoff_id": "one"}, wait=False
@@ -44,6 +71,9 @@ async def test_unknown_delivery_never_resubmits_even_when_task_lookup_is_unavail
         principal = "local"
         count = 0
 
+        def profile_identity(self):
+            return fixed_identity(self.principal)
+
         async def submit(self, packet):
             self.count += 1
             raise ContractError("designBridgeUnknown")
@@ -52,6 +82,7 @@ async def test_unknown_delivery_never_resubmits_even_when_task_lookup_is_unavail
             raise ContractError("designBridgeUnknown")
 
     client = workflow.client = Client()
+    bind(workflow, record, tmp_path)
     for _ in range(2):
         with pytest.raises(ContractError, match="designBridgeUnknown"):
             await workflow.operation(
@@ -86,12 +117,17 @@ def test_two_design_projects_share_one_unknown_source_run_barrier(tmp_path):
     assert first != second
     profile = {"cwd": tmp_path, "source_file": "same.html", "preview_file": "same.png"}
     workflow.profiles = {first: profile, second: profile}
+    workflow.client = SimpleNamespace(
+        principal="local", profile_identity=fixed_identity
+    )
     previous = workflow.load(first, one["id"])
+    workflow.check_operator_profile(previous, bind=True)
     previous["operations"]["start"] = {"task_id": "unknown-existing"}
     previous["state"] = "unknown"
     workflow.save(previous)
     workflow.guard_start(previous, profile)
     current = workflow.load(second, two["id"])
+    workflow.check_operator_profile(current, bind=True)
     with pytest.raises(ContractError, match="designBusy"):
         workflow.guard_start(current, profile)
     previous["decision"] = "rejected"

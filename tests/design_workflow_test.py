@@ -232,6 +232,9 @@ async def test_real_mcp_td_issued_bound_demo_return_reconnect_and_no_duplicate(
                 principal = actual.principal
                 submits = 0
 
+                def profile_identity(self):
+                    return actual.profile_identity()
+
                 async def task(self, identity):
                     return await actual.task(identity)
 
@@ -274,6 +277,9 @@ async def test_real_mcp_td_issued_bound_demo_return_reconnect_and_no_duplicate(
 
                 class ForeignReturn:
                     principal = actual.principal
+
+                    def profile_identity(self):
+                        return actual.profile_identity()
 
                     async def submit(self, packet):
                         return await actual.submit(packet)

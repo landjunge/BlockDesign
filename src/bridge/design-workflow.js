@@ -16,7 +16,7 @@ export function mountDesignWorkflow(store, root, projects) {
     const lang = store.getState().ui.language, changed = stale();
     get('prepare').disabled = busy || !store.getState().design || !!store.getState().ui.preview || !!store.getState().ui.grabbed;
     const unavailable = !value?.client_available;
-    get('status').textContent = notice ? t(lang, notice) : !value ? t(lang, 'codeNotPrepared') : `${t(lang, changed ? 'designStale' : unavailable ? 'designProfileUnavailable' : value.last_error ? value.last_error : value.returned && value.state === 'accepted' ? 'codeDecisionAccepted' : 'codeState_' + value.state)} · ${value.id} · SHA256 ${value.descriptor_sha256} · ${t(lang, 'designCommitUnknown')}`;
+    get('status').textContent = notice ? t(lang, notice) : !value ? t(lang, 'codeNotPrepared') : `${t(lang, changed ? 'designStale' : value.profile_drift ? 'designProfileChanged' : unavailable ? 'designProfileUnavailable' : value.last_error ? value.last_error : value.returned && value.state === 'accepted' ? 'codeDecisionAccepted' : 'codeState_' + value.state)} · ${value.id} · SHA256 ${value.descriptor_sha256} · ${t(lang, 'designCommitUnknown')}`;
     get('issue').disabled = busy || changed || unavailable || value?.state !== 'prepared';
     get('start').disabled = busy || changed || unavailable || value?.state !== 'issued_no_execution';
     get('refresh').disabled = busy || changed || unavailable || !value?.bridge_task_id;

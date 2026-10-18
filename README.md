@@ -157,6 +157,13 @@ diese Lieferung; es wendet keine neue Referenz oder Codeänderung automatisch an
 und startet keine Nacharbeit. Quellcommit, Bild-/HTML-Beziehung und Funktion bleiben
 ohne gesonderten Nachweis unbekannt. Ein Betreiberentscheid ist kein Funktionstest.
 
+Vor dem ersten Versand wird das kanonische Betreiberprofil privat gepinnt:
+Quell-CWD/Verzeichnisidentität, feste Dateinamen und beobachtbare lokale Backend-/
+Principalreferenzen. Jede Folgeaktion einschließlich erster Rückvorschau/Entscheidung
+verweigert geänderte Profile. Alte ungeklärte Starts sperren weiterhin ihr ursprünglich
+gespeichertes Quellprojekt, auch nach Entfernen/Umordnen der aktuellen Profile.
+Fehlende historische Bindungen werden nicht aus heutiger Konfiguration geraten.
+
 In **MySpace → Coding task**, prepare the exact saved version first, issue it
 through ThreadDesk separately, then explicitly start the existing Bridge workflow.
 Default startup has no configured backend identity/project profile and cannot
@@ -165,6 +172,11 @@ Refresh reads the existing owned run; answering resumes its exact recorded sessi
 Returned code/PNG is unverified and cannot replace a newer design. A reasoned
 decision is separate from delivery, functional verification and overall acceptance;
 rework does not start a new agent. Existing local box editing is unchanged.
+The original canonical operator/source profile is persisted before dispatch and
+checked on every follow-up, including the first returned preview. Drift fails closed.
+Unknown prior starts retain their original source barrier even after configured
+profiles are removed or remapped. No credential or raw profile path is exposed to
+the browser; configured peer references are not remote attestation.
 
 The source adapter was tested using real isolated MCP/ThreadDesk and an explicitly
 synthetic own CLI fixture, not a real model or installed-user runtime. A harmless
