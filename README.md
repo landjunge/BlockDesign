@@ -61,6 +61,10 @@ Einstiegskorrekturen Richtung main; kein neuer Editor. Historische Belege vom
 14.10. bleiben datiert. Die neuen begrenzten Prüfungen stehen unter
 [CONSOLIDATION-20261018](docs/acceptance/CONSOLIDATION-20261018.md).
 
+Der vorhandene Benutzercheckout wurde am 19.10.2026 auf den integrierten Mainstand
+gebracht. Sein rein lesender Startcheck bestätigt die erhaltene eigene Bindung;
+[Beleg, Bedienung und Grenzen](docs/acceptance/USER-START-20261019.md).
+
 Für den vorhandenen Checkout im Projektordner:
 
 ```sh
