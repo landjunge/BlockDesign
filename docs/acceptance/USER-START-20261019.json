@@ -1,0 +1,68 @@
+{
+  "task_id": "seven-tools-build-20261018-1833",
+  "package": "BD-C04",
+  "recorded_at": "2026-10-19T03:08:36.035810+00:00",
+  "scope": "Existing canonical checkout activation and read-only shell preflight; no product server/model/Bridge task",
+  "canonical_path": "/Users/landjunge/blockdesigner",
+  "source_commit": "4c15299ebe71429c53de6af7534734542d8c23d0",
+  "source_pr": "https://github.com/landjunge/blockdesign/pull/5",
+  "previous_checkout": {
+    "branch": "feat/compact-project-history",
+    "commit": "135741679fc8c92fe15804d94aa47bed3a4c0636",
+    "historical_branch_preserved": true
+  },
+  "current_branch": "main",
+  "activation": "ordinary checkout main and fast-forward-only merge of existing integrated source; no reset/force/clone",
+  "preservation": {
+    "private_backup": "~/.local/share/blockdesigner/operator-activation/20261019T030748Z/",
+    "before_manifest_sha256": "d75552a3fc5ae8a353602b76a597b7d3cd0951de24ca97f3de3b160abdf085c0",
+    "untracked_and_ignored_files_outside_worktrees": 1761,
+    "preserved_files_total": 1772,
+    "changed_files": 0,
+    "content_mode_owner_compared": true,
+    "worktrees_untouched": true,
+    "user_project_store_untouched": true,
+    "existing_host_binding_untouched": true
+  },
+  "actual_shell_preflight": {
+    "command": "./start.command --check",
+    "exit_code": 0,
+    "python": "3.12.13",
+    "prerequisites_ready": true,
+    "binding_ready": true,
+    "setup_required": false,
+    "checks": {
+      "python": true,
+      "threaddesk_source": true,
+      "module_contract": true,
+      "existing_binding": true
+    },
+    "workflow_profile": {
+      "configured": false,
+      "network_checked": false,
+      "dispatch_verified": false
+    }
+  },
+  "source_sha256": {
+    "start.command": "f6d4080b9b004ed8d280d1d2dfdd1c3717baede65068202332ca48077b5ef855",
+    "scripts/launch.py": "4a6450afe58090a1e49fb2e3447e45aaaeea2173c4457d869c1041987adadbfa",
+    "scripts/host.py": "c3bd3ed20ca0a142eb7a6d2771a22f9bfdca6da33ba46023ead4c3764c378f10",
+    "scripts/server.py": "f09d3d5d41103fe781d10df26f8db019d218e0ddba45269f5e9338f912a26f5a",
+    "scripts/workflow_profile.py": "ae85e33db2a8342c961013802bd86aa8cd5467b6ed10274df1293923cc59575c",
+    "scripts/static_assets.py": "53be440a06300f4f45a9cf850c68f77bb40297c4d849b9fc0399793207b386ef"
+  },
+  "new_product_server_started": false,
+  "existing_process_stopped": false,
+  "module_setup_run": false,
+  "kirabridge_changed": false,
+  "model_or_provider_called": false,
+  "tests_repeated": false,
+  "public_release_created": false,
+  "user_accepted": false,
+  "remaining_limits": [
+    "Optional operator profile not configured in user startup; no actual coding dispatch proved by this check.",
+    "KiraBridge-dependent live handoff deferred by current user instruction.",
+    "No new browser/UI/model or user acceptance is claimed.",
+    "Local backup on same disk is preservation for checkout activation, not off-device backup."
+  ]
+}
