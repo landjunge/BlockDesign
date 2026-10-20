@@ -9,7 +9,7 @@
 Vorhandener modularer Browsereditor, erweitert um eine kompakte Oberfläche, lokale Projekte/Historie und Gespräche mit echter lokaler KI. MySpace links, Workspace mittig, KI-Space rechts; die drei Bearbeitungsebenen sind davon unabhängig.
 
 ```sh
-cd /Users/landjunge/blockdesigner
+cd /path/to/blockdesign
 ./start.command
 ```
 
@@ -57,6 +57,15 @@ BD_TEST_URL=http://127.0.0.1:5191 npm run browser:zoom
 Chrome und Playwright stammen aus der vorhandenen ThreadDesk-Installation. Echte KI-Tests benötigen laufendes Ollama. Negative Rückgabe-/Transportfixtures sind ausdrücklich markiert; Speicherfehler werden zusätzlich durch tatsächlich verweigerte Dateischreibrechte geprüft. Neue Browserbelege bleiben unter `.runtime/` lokal und Git-ignoriert. [Modul-/Speichervertrag](docs/architecture.md), [Abnahme](docs/acceptance/REPORT.md).
 
 Maßgebliche Konzepte ausschließlich im bestehenden Ordner `/Users/landjunge/.threaddesk/Zukunftsvisionen/Ideen/Block Designer/`. `docs/concept` wird automatisch daraus gesichert und nicht unabhängig gepflegt.
+
+## Aktueller Funktionsstand / Current capabilities
+
+**Deutsch:** BlockDesigner 0.2.0 ist ein lokaler Browsereditor mit drei Arbeitsbereichen, drei Bearbeitungsebenen, Projekten, Historie und Undo/Redo. Die lokale KI nutzt den eingerichteten ThreadDesk-/Ollama-Weg. PNG-Referenzen und statische HTML-IDs lassen sich einem Entwurf zuordnen. Der optionale Codeauftrag benötigt ein eigenes Betreiberprofil; Übergeben, Starten und Bewerten sind getrennte Schritte. Ein fertiger Webseitenexport ist damit nicht zugesagt.
+
+**English:** BlockDesigner 0.2.0 is a local browser editor with three work areas, three editing layers, projects, history and undo/redo. Local AI uses the configured ThreadDesk/Ollama route. PNG references and static HTML IDs can be linked to a design. Optional coding tasks require an operator profile; issue, start and review are separate actions. This does not establish a finished website-export feature.
+
+Im Projektordner zuerst `./start.command --check`, dann `./start.command`; Python 3.12+ und ein kompatibler ThreadDesk-Modulhost sind erforderlich. / From the project directory, run `./start.command --check`, then `./start.command`; Python 3.12+ and a compatible ThreadDesk module host are required. [Einstieg / Startup](docs/acceptance/USER-START-20261019.md) · [Betreiberprofil / Operator profile](docs/WORKFLOW-PROFILE.md).
+
 
 ## Aktueller Einstieg und Quellstand / Current entry and source
 
