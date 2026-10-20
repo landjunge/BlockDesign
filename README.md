@@ -1,5 +1,11 @@
 # BlockDesigner · 0.2.0
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/design/icons/dark/BlockDesign-dark-128.png">
+  <img src="assets/design/icons/light/BlockDesign-light-128.png" alt="BlockDesign" width="96" height="96">
+</picture>
+
+
 Vorhandener modularer Browsereditor, erweitert um eine kompakte Oberfläche, lokale Projekte/Historie und Gespräche mit echter lokaler KI. MySpace links, Workspace mittig, KI-Space rechts; die drei Bearbeitungsebenen sind davon unabhängig.
 
 ```sh
