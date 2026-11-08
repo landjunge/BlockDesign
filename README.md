@@ -1,10 +1,28 @@
-# BlockDesigner · 0.2.0
+<p align="center">
+  <img src="assets/readme/normalized/BlockDesign-large.svg" alt="BlockDesign" width="256" height="256">
+</p>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/design/icons/dark/BlockDesign-dark-128.png">
-  <img src="assets/design/icons/light/BlockDesign-light-128.png" alt="BlockDesign" width="96" height="96">
-</picture>
+<p align="center">
+  <a href="https://github.com/landjunge/KiraBridge#readme" title="KiraBridge"><img src="assets/readme/normalized/KiraBridge-small.svg" alt="KiraBridge" width="48" height="48"></a>
+  &nbsp;
+  <a href="https://github.com/landjunge/threaddesk#readme" title="ThreadDesk"><img src="assets/readme/normalized/ThreadDesk-small.svg" alt="ThreadDesk" width="48" height="48"></a>
+  &nbsp;
+  <a href="https://github.com/landjunge/4AllPass#readme" title="4AllPass"><img src="assets/readme/normalized/4AllPass-small.svg" alt="4AllPass" width="48" height="48"></a>
+  &nbsp;
+  <a href="https://github.com/landjunge/tollgate#readme" title="TollGate"><img src="assets/readme/normalized/TollGate-small.svg" alt="TollGate" width="48" height="48"></a>
+  &nbsp;
+  <a href="https://github.com/landjunge/agent-authority-lab#readme" title="Agent Authority"><img src="assets/readme/normalized/Agent-Authority-small.svg" alt="Agent Authority" width="48" height="48"></a>
+</p>
 
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/design/wordmarks/BlockDesign-dark.svg"><img src="assets/design/wordmarks/BlockDesign-light.svg" alt="BlockDesign" width="320"></picture></p>
+
+<!-- AUTO-DOWNLOADS:START -->
+<p align="center">
+  <a href="https://github.com/landjunge/blockdesign/archive/refs/heads/main.zip" title="blockdesign-main.zip herunterladen / download"><img src="assets/readme/download-source.svg" alt="Download Quellcode / Source ZIP 0.2.0" width="190" height="52"></a>
+</p>
+<!-- AUTO-DOWNLOADS:END -->
+
+<p align="center"><strong>BlockDesigner · 0.2.0</strong></p>
 
 Vorhandener modularer Browsereditor, erweitert um eine kompakte Oberfläche, lokale Projekte/Historie und Gespräche mit echter lokaler KI. MySpace links, Workspace mittig, KI-Space rechts; die drei Bearbeitungsebenen sind davon unabhängig.
 
