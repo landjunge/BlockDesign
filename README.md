@@ -1,3 +1,5 @@
+<!-- readme-header-v1: Kopf nach ThreadDesk docs/contracts/readme-header-v1.md. Nicht von Hand umgestalten; scripts/readme_header.py apply/check verwenden. -->
+
 <p align="center">
   <img src="assets/readme/normalized/BlockDesign-large.svg" alt="BlockDesign" width="256" height="256">
 </p>
@@ -18,7 +20,7 @@
 
 <!-- AUTO-DOWNLOADS:START -->
 <p align="center">
-  <a href="https://github.com/landjunge/blockdesign/archive/refs/heads/main.zip" title="blockdesign-main.zip herunterladen / download"><img src="assets/readme/download-source.svg" alt="Download Quellcode / Source ZIP 0.2.0" width="190" height="52"></a>
+  <a href="https://github.com/landjunge/blockdesign/archive/refs/heads/main.zip" title="blockdesign-main.zip herunterladen / download"><img src="assets/readme/download-source.svg" alt="Download Quellcode / Source ZIP · 0.2.0" width="190" height="52"></a>
 </p>
 <!-- AUTO-DOWNLOADS:END -->
 
