@@ -286,3 +286,9 @@ Startsperre auch ohne alten Startindex; fehlende Quellbelege werden nicht gerate
 Reines Prepare/Issue behauptet weiterhin keine Ausführung. Unknown historical
 execution evidence retains its original local overlap barrier; prepare/issue alone
 still makes no execution claim. [Narrow follow-up evidence DE/EN](docs/acceptance/LEGACY-BARRIER-20261019.md).
+
+## Lizenz / License
+
+**Deutsch:** BlockDesign verwendet die **Netzwerkpunkt Personal Use License 1.0**. Maßgeblich ist die [vollständige Lizenz mit englischer Übersetzung](LICENSE). Bereits eingeräumte Rechte früherer Fassungen bleiben unberührt.
+
+**English:** BlockDesign uses the **Netzwerkpunkt Personal Use License 1.0**. See the [full license and English translation](LICENSE). Previously granted rights for earlier versions remain unaffected.
