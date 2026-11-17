@@ -1,14 +1,6 @@
 <!-- README-LANGUAGES -->
 <p align="center"><a href="README.md">English</a> &nbsp;|&nbsp; <strong>Deutsch</strong></p>
 
-# BlockDesign – Deutsch
-
-[English README](README.md) · [Releases](https://github.com/landjunge/BlockDesign/releases)
-
-## Downloads
-
-Die fünf vorgesehenen Installer sind noch nicht als geprüfte Installationsdateien nachgewiesen. Die grauen Felder sind keine Download-Links.
-
 <p align="center">
   <img src="assets/readme/normalized/BlockDesign-large.svg" alt="BlockDesign" width="256" height="256">
 </p>
@@ -41,5 +33,7 @@ Die fünf vorgesehenen Installer sind noch nicht als geprüfte Installationsdate
 </p>
 <p align="center"><a href="https://github.com/landjunge/BlockDesign/archive/refs/heads/main.zip">Quellcode herunterladen / Download source ZIP</a></p>
 <!-- AUTO-DOWNLOADS:END -->
+
+Die fünf vorgesehenen Installer sind noch nicht als geprüfte Installationsdateien nachgewiesen. Die grauen Felder sind keine Download-Links.
 
 Die ausführliche deutsch- und englischsprachige Projektdokumentation steht in der [Haupt-README](README.md). Die Quellcode-Datei ist kein nativer Installer.
