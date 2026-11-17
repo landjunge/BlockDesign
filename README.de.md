@@ -1,3 +1,6 @@
+<!-- README-LANGUAGES -->
+<p align="center"><a href="README.md">English</a> &nbsp;|&nbsp; <strong>Deutsch</strong></p>
+
 # BlockDesign – Deutsch
 
 [English README](README.md) · [Releases](https://github.com/landjunge/BlockDesign/releases)
