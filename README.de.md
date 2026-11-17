@@ -9,6 +9,24 @@
 
 Die fünf vorgesehenen Installer sind noch nicht als geprüfte Installationsdateien nachgewiesen. Die grauen Felder sind keine Download-Links.
 
+<p align="center">
+  <img src="assets/readme/normalized/BlockDesign-large.svg" alt="BlockDesign" width="256" height="256">
+</p>
+
+<p align="center">
+  <a href="https://github.com/landjunge/KiraBridge#readme" title="KiraBridge"><img src="assets/readme/normalized/KiraBridge-small.svg" alt="KiraBridge" width="48" height="48"></a>
+  &nbsp;
+  <a href="https://github.com/landjunge/ThreadDesk#readme" title="ThreadDesk"><img src="assets/readme/normalized/ThreadDesk-small.svg" alt="ThreadDesk" width="48" height="48"></a>
+  &nbsp;
+  <a href="https://github.com/landjunge/4AllPass#readme" title="4AllPass"><img src="assets/readme/normalized/4AllPass-small.svg" alt="4AllPass" width="48" height="48"></a>
+  &nbsp;
+  <a href="https://github.com/landjunge/TollGate#readme" title="TollGate"><img src="assets/readme/normalized/TollGate-small.svg" alt="TollGate" width="48" height="48"></a>
+  &nbsp;
+  <a href="https://github.com/landjunge/AgentAuthority#readme" title="Agent Authority"><img src="assets/readme/normalized/Agent-Authority-small.svg" alt="Agent Authority" width="48" height="48"></a>
+</p>
+
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/design/wordmarks/BlockDesign-dark.svg"><img src="assets/design/wordmarks/BlockDesign-light.svg" alt="BlockDesign" width="320"></picture></p>
+
 <!-- AUTO-DOWNLOADS:START -->
 <p align="center">
   <img src="assets/readme/download-macos-apple-silicon.svg" alt="macOS Apple Silicon: In Vorbereitung / Coming soon" width="190" height="52">
